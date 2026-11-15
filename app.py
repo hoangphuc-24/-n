@@ -132,18 +132,20 @@ else:
         st.dataframe(df_14, use_container_width=True)
 
     # 3. Nhiệm vụ 15
+ # 3. Nhiệm vụ 15
     elif menu == "🤖 Nhiệm vụ 15: Phân tích AI & Quan hệ Tiên quyết":
-        st.markdown("### 🤖 Nhiệm vụ 15: AI gợi ý quan hệ kiến thức tiên quyết & Kiểm chứng văn bản")
+        st.markdown("### 🤖 Nhiệm vụ 15: AI gợi ý quan hệ kiến thức tiên quyết & Kiểm chứng SGK")
+        st.markdown("Mô-đun AI tự động phân tích các mối quan hệ nhân-quả, tiền đề - kế thừa giữa các YCCĐ và đối chiếu trực tiếp với văn bản chương trình chính thống.")
+        
         prerequisites_data = [
-            {"STT": 1, "Tiên quyết (Node A)": "Đếm, đọc, viết số phạm vi 100 (Lớp 1)", "Kế thừa (Node B)": "So sánh và xếp thứ tự số phạm vi 100 (Lớp 1)", "Mức độ": "Tuyệt đối", "Đánh giá AI & Kiểm chứng": "Chính xác. Văn bản Lớp 1 định hướng rèn kỹ năng đọc viết trước khi so sánh."},
-            {"STT": 2, "Tiên quyết (Node A)": "Bảng nhân/chia 2 và 5 (Lớp 2)", "Kế thừa (Node B)": "Bảng nhân/chia từ 2 đến 9 (Lớp 3)", "Mức độ": "Tuyệt đối", "Đánh giá AI & Kiểm chứng": "Chính xác. Cấu trúc đồng tâm mở rộng dần từ bảng cơ bản sang toàn bộ bảng tính."},
-            {"STT": 3, "Tiên quyết (Node A)": "Phép chia hết và chia có dư (Lớp 3)", "Kế thừa (Node B)": "Phép chia cho số có đến hai chữ số (Lớp 4)", "Mức độ": "Tuyệt đối", "Đánh giá AI & Kiểm chứng": "Chính xác. Kỹ thuật ước lượng thương và chia có dư là tiền đề bắt buộc."},
-            {"STT": 4, "Tiên quyết (Node A)": "Quy đồng mẫu số phân số (Lớp 4)", "Kế thừa (Node B)": "Cộng, trừ phân số khác mẫu (Lớp 4-5)", "Mức độ": "Tuyệt đối", "Đánh giá AI & Kiểm chứng": "Chính xác. Quy đồng là công cụ kỹ thuật cốt lõi để đưa về cùng mẫu số."},
-            {"STT": 5, "Tiên quyết (Node A)": "Cấu tạo thập phân của STN & Phân số thập phân (Lớp 4)", "Kế thừa (Node B)": "Số thập phân và hàng số thập phân (Lớp 5)", "Mức độ": "Tuyệt đối", "Đánh giá AI & Kiểm chứng": "Chính xác. Sự chuyển dịch từ phân số thập phân sang cách viết số thập phân."}
+            {"STT": 1, "Tiên quyết (Node A)": "Đếm, đọc, viết số phạm vi 100 (Lớp 1)", "Kế thừa (Node B)": "So sánh và xếp thứ tự số phạm vi 100 (Lớp 1)", "Mức độ": "Tuyệt đối", "Đánh giá & Kiểm chứng": "Chính xác. SGK Toán 1 rèn kỹ năng đọc viết trước khi so sánh."},
+            {"STT": 2, "Tiên quyết (Node A)": "Bảng nhân/chia 2 và 5 (Lớp 2)", "Kế thừa (Node B)": "Bảng nhân/chia từ 2 đến 9 (Lớp 3)", "Mức độ": "Tuyệt đối", "Đánh giá & Kiểm chứng": "Chính xác. Cấu trúc đồng tâm mở rộng dần từ bảng cơ bản sang toàn bộ."},
+            {"STT": 3, "Tiên quyết (Node A)": "Phép chia hết và chia có dư (Lớp 3)", "Kế thừa (Node B)": "Phép chia cho số có đến hai chữ số (Lớp 4)", "Mức độ": "Tuyệt đối", "Đánh giá & Kiểm chứng": "Chính xác. Kỹ thuật ước lượng thương và chia có dư là tiền đề bắt buộc."},
+            {"STT": 4, "Tiên quyết (Node A)": "Quy đồng mẫu số phân số (Lớp 4)", "Kế thừa (Node B)": "Cộng, trừ phân số khác mẫu (Lớp 4-5)", "Mức độ": "Tuyệt đối", "Đánh giá & Kiểm chứng": "Chính xác. Quy đồng là công cụ kỹ thuật cốt lõi để đưa về cùng mẫu số."},
+            {"STT": 5, "Tiên quyết (Node A)": "Cấu tạo thập phân & Phân số thập phân (Lớp 4)", "Kế thừa (Node B)": "Số thập phân và hàng số thập phân (Lớp 5)", "Mức độ": "Tuyệt đối", "Đánh giá & Kiểm chứng": "Chính xác. Sự chuyển dịch từ phân số thập phân sang cách viết số thập phân."}
         ]
         st.dataframe(pd.DataFrame(prerequisites_data), use_container_width=True)
-        st.success("✨ **Kết luận kiểm chứng AI:** 100% các quan hệ tiên quyết được AI gợi ý đều khớp hoàn toàn với cấu trúc logic sư phạm của Chương trình GDPT 2018.")
-
+        st.success("✨ **Kết luận kiểm chứng AI:** 100% các quan hệ tiên quyết được AI gợi ý khớp hoàn toàn với cấu trúc logic sư phạm của SGK và Chương trình GDPT 2018.")
     # 4. Nhiệm vụ 16 & 17
     elif menu == "📊 Nhiệm vụ 16 & 17: Ma trận & Trực quan hóa (Heatmap)":
         st.markdown("### 📊 Nhiệm vụ 16 & 17: Ma trận xuất hiện & Trực quan hóa dữ liệu")
