@@ -44,7 +44,8 @@ st.sidebar.title("Điều hướng Đề tài")
 menu = st.sidebar.radio(
     "Chọn nhiệm vụ / nội dung:",
     [
-        "🏠 Tổng quan Dự án",
+       "🏠 Tổng quan Dự án",
+        "🏠 Dashboard & Yêu cầu tối thiểu",
         "📋 Nhiệm vụ 13 & 14: Mã hóa YCCĐ & Bộ số/Phép tính",
         "🤖 Nhiệm vụ 15: Phân tích AI & Quan hệ Tiên quyết",
         "📊 Nhiệm vụ 16 & 17: Ma trận & Trực quan hóa (Heatmap)",
@@ -83,28 +84,28 @@ else:
             * **Ứng dụng AI có kiểm chứng:** Đề xuất và kiểm chứng quan hệ kiến thức tiên quyết.
             * **Trực quan hóa dữ liệu:** Xây dựng ma trận tần suất, biểu đồ nhiệt và sơ đồ tiến trình.
             """)
-            # 1. Dashboard tổng quan đáp ứng yêu cầu tối thiểu
-if menu == "🏠 Dashboard & Yêu cầu tối thiểu":
-    st.markdown("### 📊 Tổng quan Hệ thống (Đáp ứng Tiêu chí Tối thiểu)")
+      # 1. Dashboard tổng quan đáp ứng yêu cầu tối thiểu
+    elif menu == "🏠 Dashboard & Yêu cầu tối thiểu":
+         st.markdown("### 📊 Tổng quan Hệ thống (Đáp ứng Tiêu chí Tối thiểu)")
     
-    # 1. Bốn chỉ số tổng quan (4 Metrics)
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Tổng số YCCĐ", len(df))
-    with col2:
+         # 1. Bốn chỉ số tổng quan (4 Metrics)
+         col1, col2, col3, col4 = st.columns(4)
+         with col1:
+          st.metric("Tổng số YCCĐ", len(df))
+         with col2:
         st.metric("Khối lớp khảo sát", df['Lớp'].nunique() if 'Lớp' in df.columns else 5)
-    with col3:
+        with col3:
         st.metric("Chủ đề cốt lõi", df['Chủ đề cốt lõi'].nunique())
-    with col4:
+        with col4:
         st.metric("Mức độ nhận thức", df['Mã mức độ'].nunique() if 'Mã mức độ' in df.columns else 4)
     
-    st.markdown("---")
-    st.markdown("### 📈 Hai Biểu đồ Phân tích Trực quan")
-    
-    # 2. Hai biểu đồ phân tích (Chart 1 & Chart 2)
-    col_chart1, col_chart2 = st.columns(2)
-    
-    with col_chart1:
+        st.markdown("---")
+        st.markdown("### 📈 Hai Biểu đồ Phân tích Trực quan")
+        
+            # 2. Hai biểu đồ phân tích (Chart 1 & Chart 2)
+        col_chart1, col_chart2 = st.columns(2)
+        
+        with col_chart1:
         st.markdown("##### 📊 Biểu đồ 1: Phân phối YCCĐ theo Khối lớp")
         if 'Lớp' in df.columns:
             fig, ax = plt.subplots(figsize=(6, 4))
@@ -114,7 +115,7 @@ if menu == "🏠 Dashboard & Yêu cầu tối thiểu":
             ax.set_ylabel("Số lượng YCCĐ")
             st.pyplot(fig)
             
-    with col_chart2:
+        with col_chart2:
         st.markdown("##### 🎨 Biểu đồ 2: Ma trận nhiệt (Heatmap) Chủ đề x Lớp")
         if 'Mã YCCĐ' in df.columns and 'Lớp' in df.columns:
             freq_matrix = pd.pivot_table(df, values='Mã YCCĐ', index='Chủ đề cốt lõi', columns='Lớp', aggfunc='count', fill_value=0)
