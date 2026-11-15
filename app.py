@@ -168,7 +168,6 @@ elif menu == "📑 Nhiệm vụ 18: Báo cáo Chuyên gia AI":
         st.markdown("#### 1. SỰ MỞ RỘNG PHẠM VI SỐ HỌC & TÍNH ĐỒNG TÂM")
         st.markdown("Chương trình tuân thủ triệt để nguyên tắc từ gần đến xa, hình xoắn ốc đồng tâm từ Lớp 1 đến Lớp 5 trong mạch Số và Phép tính.")
 
----
 
 ### 📋 Hướng dẫn cập nhật:
 1. Copy toàn bộ đoạn mã trên dán đè vào file **`app.py`** của bạn.
