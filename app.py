@@ -854,6 +854,9 @@ with tab_4:
 # ------------------------------------------------------------------------------
 # TAB 5: PHÂN TÍCH ĐỒNG TÂM & BÁO CÁO BẢO VỆ
 # ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# TAB 5: PHÂN TÍCH ĐỒNG TÂM & BÁO CÁO BẢO VỆ
+# ------------------------------------------------------------------------------
 with tab_5:
     st.subheader(
         "Phân tích sự mở rộng phạm vi, tính đồng tâm và chiều sâu kiến thức"
@@ -872,18 +875,18 @@ with tab_5:
        - **Lớp 3:** Mở rộng lên **10.000 và 100.000** (hàng Nghìn, Chục nghìn) và **làm quen phân số** ($1/2$ đến $1/9$).
        - **Lớp 4:** Mở rộng đến **Lớp triệu** và hoàn thiện **tập hợp Phân số** (tử số, mẫu số, quy đồng, rút gọn).
        - **Lớp 5:** Hệ thống hóa Số tự nhiên – Phân số và mở rộng sang **Số thập phân, Tỉ số phần trăm**.
-       *(Mỗi vòng số mới đều lặp lại chu trình nhận thức: Đếm/Đọc/Viết $\rightarrow$ Cấu tạo thập phân $\rightarrow$ So sánh/Xếp thứ tự $\rightarrow$ Làm tròn số).*
+       *(Mỗi vòng số mới đều lặp lại chu trình nhận thức: Đếm/Đọc/Viết → Cấu tạo thập phân → So sánh/Xếp thứ tự → Làm tròn số).*
 
     2. **Đồng tâm về cấu trúc phép tính & tính chất số học:**
        - Bốn phép tính (`Cộng, Trừ, Nhân, Chia`) cùng các tính chất (*giao hoán, kết hợp, phân phối*) không học dứt điểm một lần mà lặp lại trên từng tập số mới:
-         - **Giai đoạn 1 (Lớp 1–3):** Thực hiện trên **Số tự nhiên** (từ không nhớ $\rightarrow$ có nhớ 1 lượt $\rightarrow$ nhớ nhiều lượt $\rightarrow$ chia có dư).
+         - **Giai đoạn 1 (Lớp 1–3):** Thực hiện trên **Số tự nhiên** (từ không nhớ → có nhớ 1 lượt → nhớ nhiều lượt → chia có dư).
          - **Giai đoạn 2 (Lớp 4):** Tái cấu trúc 4 phép tính trên **Phân số**.
          - **Giai đoạn 3 (Lớp 5):** Tái cấu trúc 4 phép tính trên **Số thập phân**.
 
     3. **Đồng tâm nâng cao về độ sâu tư duy & giải quyết vấn đề:**
-       - **Chỉ số độ sâu tư duy trung bình** tăng tịnh tiến qua các lớp: **2.00 (Lớp 1) $\rightarrow$ 1.95 (Lớp 2) $\rightarrow$ 2.13 (Lớp 3) $\rightarrow$ 2.31 (Lớp 4) $\rightarrow$ 2.54 (Lớp 5)**.
+       - **Chỉ số độ sâu tư duy trung bình** tăng tịnh tiến qua các lớp: **2.00 (Lớp 1) → 1.95 (Lớp 2) → 2.13 (Lớp 3) → 2.31 (Lớp 4) → 2.54 (Lớp 5)**.
        - Tỷ trọng nhóm mức độ **Vận dụng & Vận dụng cao (VD + VDC)** tăng từ **40.0%** ở Lớp 1 lên **53.8%** ở Lớp 5.
-       - Độ phức tạp của **bài toán có lời văn** phát triển đồng tâm theo số bước giải: **1 bước tính** (Lớp 1–2) $\rightarrow$ **2 bước tính** (Lớp 3) $\rightarrow$ **2–3 bước tính** (Lớp 4) $\rightarrow$ **3–4 bước tính** (Lớp 5).
+       - Độ phức tạp của **bài toán có lời văn** phát triển đồng tâm theo số bước giải: **1 bước tính** (Lớp 1–2) → **2 bước tính** (Lớp 3) → **2–3 bước tính** (Lớp 4) → **3–4 bước tính** (Lớp 5).
     """)
 
     st.divider()
@@ -893,7 +896,6 @@ with tab_5:
     - **Bước 2 – Phân tích quan hệ tiên quyết với AI có kiểm chứng:** Sử dụng AI gợi ý cây phụ thuộc kiến thức giữa các lớp, sau đó đối chiếu thủ công với SGK *Kết nối tri thức với cuộc sống* để loại bỏ các suy diễn vượt chuẩn chương trình.
     - **Bước 3 – Định lượng & Trực quan hóa:** Gán trọng số nhận thức ($NB=1, TH=2, VD=3, VDC=4$), xây dựng ma trận tần suất 18 tuyến nội dung và biểu diễn trên dashboard Streamlit.
     """)
-
 # ------------------------------------------------------------------------------
 # TAB 6: KHO DỮ LIỆU EXCEL GỐC (TẢI XUỐNG & XEM TRƯỚC)
 # ------------------------------------------------------------------------------
