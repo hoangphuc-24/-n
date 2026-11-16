@@ -8,12 +8,12 @@ import streamlit as st
 # CẤU HÌNH TRANG & GIAO DIỆN
 # ==============================================================================
 st.set_page_config(
-    page_title="Curriculum Analytics | Đề 13: Mạch Số & Phép tính (Lớp 1-5)",
+    page_title="Curriculum Analytics | Mạch Số & Phép tính (Lớp 1-5)",
     page_icon="📊",
     layout="wide",
 )
 
-st.title("📊 CURRICULUM ANALYTICS / ĐỀ 13: MẠCH SỐ VÀ PHÉP TÍNH (LỚP 1–5)")
+st.title("📊 CURRICULUM ANALYTICS: MẠCH SỐ VÀ PHÉP TÍNH (LỚP 1–5)")
 st.caption(
     "Phân tích tiến trình phát triển chương trình GDPT 2018 môn Toán Tiểu học"
     " | Dữ liệu chuẩn hóa: 108 YCCĐ"
@@ -28,7 +28,7 @@ def load_all_data():
     # 1. File NV 13,14.xlsx
     df_yccd = pd.read_excel("NV 13,14.xlsx", sheet_name="NV13_Ma_Hoa_YCCD")
     df_nv14 = pd.read_excel(
-        "NV 13,14.xlsx", sheet_name="Bo_Ma_So_Phep_Tinh", skiprows=2
+        "NV 13,14.xlsx", sheet_name="NV14_Bo_Ma_So_Phep_Tinh", skiprows=2
     )
     df_quyuoc = pd.read_excel(
         "NV 13,14.xlsx", sheet_name="Quy_Uoc_Ma_Hoa", skiprows=2
@@ -174,7 +174,7 @@ if search_keyword.strip():
 # ==============================================================================
 # PHẦN 1: 4 CHỈ SỐ TỔNG QUAN (KPI CARDS)
 # ==============================================================================
-st.markdown("### Chỉ số tổng quan toàn mạch (KPIs)")
+st.markdown("### Chỉ số tổng quan toàn mạch")
 kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
 total_records = len(df_filtered)
@@ -189,7 +189,7 @@ avg_depth = (
 
 with kpi1:
     st.metric(
-        "📌 Tổng số YCCĐ (Records)",
+        "📌 Tổng số YCCĐ",
         f"{total_records} / 108",
         f"Chiếm {total_records/108*100:.1f}% chương trình",
     )
@@ -215,22 +215,23 @@ with kpi4:
 st.divider()
 
 # ==============================================================================
-# PHẦN 2: CÁC TAB THEO ĐÚNG THỨ TỰ: NV 13-14 | NV 15 | NV 16 | NV 17 | NV 18
+# PHẦN 2: CÁC TAB MENU (ĐÃ XÓA GHI CHÚ NHIỆM VỤ & THÊM TAB KHO FILE EXCEL)
 # ==============================================================================
-tab_13_14, tab_15, tab_16, tab_17, tab_18 = st.tabs([
-    "📋  Mã hóa YCCĐ & Bộ mã Số",
-    "🔗  Kiến thức tiên quyết",
-    "📊  Ma trận xuất hiện & Mức phát triển",
-    "🗺️  Sơ đồ tiến trình & Heatmap",
-    "📝  Báo cáo bảo vệ",
+tab_1, tab_2, tab_3, tab_4, tab_5, tab_files = st.tabs([
+    "📋 Mã hóa YCCĐ & Bộ mã Số",
+    "🔗 Quan hệ kiến thức tiên quyết",
+    "📊 Ma trận xuất hiện & Mức phát triển",
+    "🗺️ Sơ đồ tiến trình & Heatmap",
+    "📝 Phân tích đồng tâm & Báo cáo",
+    "📂 Kho dữ liệu Excel gốc",
 ])
 
 # ------------------------------------------------------------------------------
-# TAB 1: NV 13 & NV 14 GỘP CHUNG
+# TAB 1: MÃ HÓA YCCĐ & BỘ MÃ SỐ
 # ------------------------------------------------------------------------------
-with tab_13_14:
+with tab_1:
     st.subheader(
-        "Trích xuất & Mã hóa 108 Yêu cầu cần đạt (Minh chứng nguồn)"
+        "Trích xuất & Mã hóa 108 Yêu cầu cần đạt (Bảng truy xuất minh chứng)"
     )
 
     col_dl, col_info = st.columns([1, 3])
@@ -239,7 +240,7 @@ with tab_13_14:
         st.download_button(
             label="📥 Tải bảng dữ liệu đang lọc (CSV)",
             data=csv_data,
-            file_name="NV13_Ma_Hoa_108_YCCD.csv",
+            file_name="Ma_Hoa_108_YCCD.csv",
             mime="text/csv",
         )
     with col_info:
@@ -266,22 +267,18 @@ with tab_13_14:
 
     st.divider()
     st.subheader(
-        " Bộ mã hóa Số tự nhiên, Phân số, Số thập phân & Phép tính"
-        " tương ứng"
+        "Bộ mã hóa Số tự nhiên, Phân số, Số thập phân & Phép tính tương ứng"
     )
     st.dataframe(df_nv14, use_container_width=True, hide_index=True)
 
-    with st.expander("📖 Xem Quy ước hệ thống mã định danh "):
+    with st.expander("📖 Xem Quy ước hệ thống mã định danh"):
         st.dataframe(df_quyuoc, use_container_width=True, hide_index=True)
 
 # ------------------------------------------------------------------------------
-# TAB 2: NV 15 RIÊNG
+# TAB 2: QUAN HỆ KIẾN THỨC TIÊN QUYẾT
 # ------------------------------------------------------------------------------
-with tab_15:
-    st.subheader(
-        " Phân tích quan hệ kiến thức tiên quyết (AI gợi ý có kiểm"
-        " chứng)"
-    )
+with tab_2:
+    st.subheader("Phân tích quan hệ kiến thức tiên quyết qua các khối lớp")
     st.markdown(
         "**1. Bảng tổng hợp mối quan hệ tiên quyết trực tiếp từ Lớp 1 đến"
         " Lớp 5:**"
@@ -296,16 +293,14 @@ with tab_15:
         st.markdown("**3. Tuyến Kỹ thuật phép tính, Biểu thức & Giải toán:**")
         st.dataframe(df_nv15_pt, use_container_width=True, hide_index=True)
 
-    with st.expander("📚 Văn bản căn cứ & Tài liệu kiểm chứng "):
+    with st.expander("📚 Văn bản căn cứ & Tài liệu kiểm chứng"):
         st.dataframe(df_nv15_tc, use_container_width=True, hide_index=True)
 
 # ------------------------------------------------------------------------------
-# TAB 3: NV 16 RIÊNG
+# TAB 3: MA TRẬN XUẤT HIỆN & MỨC PHÁT TRIỂN
 # ------------------------------------------------------------------------------
-with tab_16:
-    st.subheader(
-        " Ma trận xuất hiện và Mức độ phát triển theo khối lớp"
-    )
+with tab_3:
+    st.subheader("Ma trận xuất hiện và Mức độ phát triển theo khối lớp")
 
     col_16_chart1, col_16_chart2 = st.columns(2)
 
@@ -391,16 +386,14 @@ with tab_16:
     )
     st.dataframe(df_nv16_nhan_thuc, use_container_width=True, hide_index=True)
 
-    with st.expander(
-        "🔍 Xem Bảng ánh xạ 108 Mã YCCĐ vào Ma trận phát triển "
-    ):
+    with st.expander("🔍 Xem Bảng ánh xạ 108 Mã YCCĐ vào Ma trận phát triển"):
         st.dataframe(df_nv16_truyxuat, use_container_width=True, hide_index=True)
 
 # ------------------------------------------------------------------------------
-# TAB 4: NV 17 RIÊNG
+# TAB 4: SƠ ĐỒ TIẾN TRÌNH & HEATMAP
 # ------------------------------------------------------------------------------
-with tab_17:
-    st.subheader( Thiết kế Sơ đồ tiến trình và Heatmap")
+with tab_4:
+    st.subheader("Sơ đồ tiến trình và Bản đồ nhiệt mật độ kiến thức")
 
     st.markdown(
         "**Phần 1: Bản đồ tiến trình phát triển mạch Số và phép tính (Lớp 1 →"
@@ -524,12 +517,11 @@ with tab_17:
         )
 
 # ------------------------------------------------------------------------------
-# TAB 5: NV 18 & BÁO CÁO BẢO VỆ
+# TAB 5: PHÂN TÍCH ĐỒNG TÂM & BÁO CÁO BẢO VỆ
 # ------------------------------------------------------------------------------
-with tab_18:
+with tab_5:
     st.subheader(
-        "Phân tích sự mở rộng phạm vi, tính đồng tâm và chiều sâu"
-        " kiến thức"
+        "Phân tích sự mở rộng phạm vi, tính đồng tâm và chiều sâu kiến thức"
     )
     st.success(
         "**Câu hỏi bảo vệ:** *Mạch Số và phép tính thể hiện nguyên tắc đồng"
@@ -562,7 +554,101 @@ with tab_18:
     st.divider()
     st.subheader("🛠️ Báo cáo giải thích phương pháp & Kiểm chứng AI")
     st.markdown("""
-    - **Bước 1 – Trích xuất & Mã hóa (NV13, NV14):** Rà soát toàn văn Thông tư 32/2018/TT-BGDĐT, bóc tách thành **108 YCCĐ** độc lập và gắn mã định danh theo cấu trúc `[Lớp]_[Mạch]_[Mức độ]_[STT]`.
-    - **Bước 2 – Phân tích quan hệ tiên quyết với AI có kiểm chứng (NV15):** Sử dụng AI gợi ý cây phụ thuộc kiến thức giữa các lớp, sau đó đối chiếu thủ công với SGK *Kết nối tri thức với cuộc sống* để loại bỏ các suy diễn vượt chuẩn chương trình.
-    - **Bước 3 – Định lượng & Trực quan hóa (NV16, NV17, NV18):** Gán trọng số nhận thức ($NB=1, TH=2, VD=3, VDC=4$), xây dựng ma trận tần suất 18 tuyến nội dung và biểu diễn trên dashboard Streamlit.
+    - **Bước 1 – Trích xuất & Mã hóa dữ liệu:** Rà soát toàn văn Thông tư 32/2018/TT-BGDĐT, bóc tách thành **108 YCCĐ** độc lập và gắn mã định danh theo cấu trúc `[Lớp]_[Mạch]_[Mức độ]_[STT]`.
+    - **Bước 2 – Phân tích quan hệ tiên quyết với AI có kiểm chứng:** Sử dụng AI gợi ý cây phụ thuộc kiến thức giữa các lớp, sau đó đối chiếu thủ công với SGK *Kết nối tri thức với cuộc sống* để loại bỏ các suy diễn vượt chuẩn chương trình.
+    - **Bước 3 – Định lượng & Trực quan hóa:** Gán trọng số nhận thức ($NB=1, TH=2, VD=3, VDC=4$), xây dựng ma trận tần suất 18 tuyến nội dung và biểu diễn trên dashboard Streamlit.
     """)
+
+# ------------------------------------------------------------------------------
+# TAB 6: KHO DỮ LIỆU EXCEL GỐC (TẢI XUỐNG & XEM TRƯỚC)
+# ------------------------------------------------------------------------------
+with tab_files:
+    st.subheader("📂 Kho lưu trữ & Tải xuống các file dữ liệu Excel gốc")
+    st.markdown(
+        "Bạn có thể tải trực tiếp từng file Excel (`.xlsx`) về máy hoặc xem"
+        " nhanh nội dung các sheet bên dưới:"
+    )
+
+    # Thay đổi URL bên dưới thành link GitHub thực tế của bạn nếu muốn dẫn trực tiếp tới repo
+    GITHUB_REPO_URL = "https://github.com/hoangphuc-24"
+
+    excel_catalog = [
+        {
+            "filename": "NV 13,14.xlsx",
+            "title": "Dữ liệu Mã hóa YCCĐ & Bộ mã Số – Phép tính",
+            "desc": (
+                "Chứa 108 mã YCCĐ chi tiết, bộ mã phân loại nhóm số và quy ước"
+                " mã định danh."
+            ),
+        },
+        {
+            "filename": "NV15.xlsx",
+            "title": "Dữ liệu Phân tích Quan hệ Kiến thức Tiên quyết",
+            "desc": (
+                "Chứa ma trận quan hệ tiên quyết, tuyến phạm vi số và giới hạn"
+                " kỹ thuật phép tính."
+            ),
+        },
+        {
+            "filename": "NV16.xlsx",
+            "title": "Dữ liệu Định lượng Tần suất & Mức độ Phát triển",
+            "desc": (
+                "Chứa ma trận tần suất xuất hiện theo mạch kiến thức và chỉ số"
+                " độ sâu tư duy."
+            ),
+        },
+        {
+            "filename": "NV17.xlsx",
+            "title": "Dữ liệu Bản đồ Tiến trình & Heatmap",
+            "desc": (
+                "Chứa dữ liệu heatmap 18 tuyến nội dung chuẩn hóa và 4 thao tác"
+                " nhận thức."
+            ),
+        },
+    ]
+
+    cols_file = st.columns(2)
+    for idx, item in enumerate(excel_catalog):
+        fname = item["filename"]
+        with cols_file[idx % 2]:
+            with st.container(border=True):
+                st.markdown(f"#### 📄 {item['title']}")
+                st.caption(f"Tên file gốc: `{fname}` — {item['desc']}")
+
+                btn_col1, btn_col2 = st.columns(2)
+                with btn_col1:
+                    if os.path.exists(fname):
+                        with open(fname, "rb") as f:
+                            st.download_button(
+                                label=f"📥 Tải file {fname}",
+                                data=f,
+                                file_name=fname,
+                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                key=f"dl_{fname}",
+                                use_container_width=True,
+                            )
+                    else:
+                        st.warning(f"Không tìm thấy {fname}")
+
+                with btn_col2:
+                    # Link mở trực tiếp trên GitHub (bạn có thể điền tên repo cụ thể vào URL nếu cần)
+                    st.link_button(
+                        label="🔗 Mở trên GitHub",
+                        url=f"{GITHUB_REPO_URL}",
+                        use_container_width=True,
+                    )
+
+    st.divider()
+    st.markdown("### 👁️ Xem nhanh nội dung chi tiết từng file Excel")
+    selected_preview_file = st.selectbox(
+        "Chọn file Excel muốn kiểm tra cấu trúc các sheet:",
+        options=[x["filename"] for x in excel_catalog],
+    )
+
+    if os.path.exists(selected_preview_file):
+        xls_preview = pd.ExcelFile(selected_preview_file)
+        sheet_tabs = st.tabs(xls_preview.sheet_names)
+        for i, s_name in enumerate(xls_preview.sheet_names):
+            with sheet_tabs[i]:
+                df_raw = pd.read_excel(selected_preview_file, sheet_name=s_name)
+                st.dataframe(df_raw, use_container_width=True)
