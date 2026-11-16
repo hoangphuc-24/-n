@@ -44,21 +44,39 @@ def load_all_data():
     df_nv15_pt = pd.read_excel(
         "NV15.xlsx", sheet_name="Tuyen Phep Tinh & Bai Toan", skiprows=2
     )
+    df_nv15_tc = pd.read_excel(
+        "NV15.xlsx", sheet_name="Thông Tin Tra Cứu", skiprows=2
+    )
 
     # 3. File NV16.xlsx
+    df_nv16_raw = pd.read_excel(
+        "NV16.xlsx", sheet_name="2_DinhLuong_TanSuat_YCCD", skiprows=3
+    )
+    df_nv16_mach = df_nv16_raw.iloc[:6].copy()
+    df_nv16_nhan_thuc = pd.read_excel(
+        "NV16.xlsx", sheet_name="2_DinhLuong_TanSuat_YCCD", skiprows=12
+    )
     df_nv16_truyxuat = pd.read_excel(
         "NV16.xlsx", sheet_name="3_TruyXuat_108_MaYCCD", skiprows=2
     )
 
-    # 4. File NV17.xlsx (Lấy 18 dòng tuyến nội dung chuẩn hóa)
+    # 4. File NV17.xlsx
     df_nv17_raw = pd.read_excel(
         "NV17.xlsx", sheet_name="3_DuLieu_Heatmap_Excel", skiprows=3
     )
-    df_heatmap = df_nv17_raw.iloc[:18].copy()
+    df_heatmap_18 = df_nv17_raw.iloc[:18].copy()
     for col in ["Lớp 1", "Lớp 2", "Lớp 3", "Lớp 4", "Lớp 5", "Tổng YCCĐ"]:
-        df_heatmap[col] = pd.to_numeric(df_heatmap[col], errors="coerce").fillna(
-            0
-        )
+        df_heatmap_18[col] = pd.to_numeric(
+            df_heatmap_18[col], errors="coerce"
+        ).fillna(0)
+
+    df_heatmap_cog = pd.read_excel(
+        "NV17.xlsx", sheet_name="3_DuLieu_Heatmap_Excel", skiprows=25
+    ).iloc[:4]
+    for col in ["Lớp 1", "Lớp 2", "Lớp 3", "Lớp 4", "Lớp 5", "Tổng YCCĐ"]:
+        df_heatmap_cog[col] = pd.to_numeric(
+            df_heatmap_cog[col], errors="coerce"
+        ).fillna(0)
 
     return (
         df_yccd,
@@ -67,8 +85,12 @@ def load_all_data():
         df_nv15_tq,
         df_nv15_pvs,
         df_nv15_pt,
+        df_nv15_tc,
+        df_nv16_mach,
+        df_nv16_nhan_thuc,
         df_nv16_truyxuat,
-        df_heatmap,
+        df_heatmap_18,
+        df_heatmap_cog,
     )
 
 
@@ -80,26 +102,28 @@ try:
         df_nv15_tq,
         df_nv15_pvs,
         df_nv15_pt,
+        df_nv15_tc,
+        df_nv16_mach,
+        df_nv16_nhan_thuc,
         df_nv16_truyxuat,
-        df_heatmap,
+        df_heatmap_18,
+        df_heatmap_cog,
     ) = load_all_data()
 except Exception as e:
     st.error(
-        f"Lỗi đọc dữ liệu Excel: {e}. Hãy đảm bảo đủ 4 file Excel nằm cùng thư"
-        " mục với app.py."
+        f"Lỗi đọc dữ liệu Excel: {e}. Hãy kiểm tra lại tên các file Excel trên"
+        " GitHub."
     )
     st.stop()
 
-# Ánh xạ trọng số nhận thức (1 -> 4)
 weight_map = {"NB": 1, "TH": 2, "VD": 3, "VDC": 4}
 df_yccd["Điểm nhận thức"] = df_yccd["Mã mức độ"].map(weight_map)
 
 # ==============================================================================
-# THANH BÊN (SIDEBAR): HỆ THỐNG BỘ LỌC TƯƠNG TÁC (ĐÁP ỨNG >= 2 BỘ LỌC)
+# THANH BÊN (SIDEBAR): BỘ LỌC TƯƠNG TÁC
 # ==============================================================================
 st.sidebar.header("🔍 BỘ LỌC TRUY XUẤT DỮ LIỆU")
 
-# Bộ lọc 1: Khối lớp
 all_grades = sorted(df_yccd["Lớp"].unique().tolist())
 selected_grades = st.sidebar.multiselect(
     "1. Chọn Khối lớp:",
@@ -108,13 +132,11 @@ selected_grades = st.sidebar.multiselect(
     format_func=lambda x: f"Lớp {x}",
 )
 
-# Bộ lọc 2: Mạch nội dung
 all_topics = df_yccd["Nội dung"].unique().tolist()
 selected_topics = st.sidebar.multiselect(
     "2. Chọn Mạch nội dung:", options=all_topics, default=all_topics
 )
 
-# Bộ lọc 3: Mức độ nhận thức
 all_levels = ["NB", "TH", "VD", "VDC"]
 level_labels = {
     "NB": "NB - Nhận biết (1)",
@@ -129,7 +151,6 @@ selected_levels = st.sidebar.multiselect(
     format_func=lambda x: level_labels.get(x, x),
 )
 
-# Bộ lọc 4: Tìm kiếm từ khóa
 search_keyword = st.sidebar.text_input(
     "4. Tìm kiếm từ khóa trong YCCĐ / Mã:",
     placeholder="Ví dụ: phân số, làm tròn, L4_...",
@@ -151,13 +172,13 @@ if search_keyword.strip():
     ]
 
 # ==============================================================================
-# PHẦN 1: 4 CHỈ SỐ TỔNG QUAN (KPI CARDS) - YÊU CẦU TỐI THIỂU
+# PHẦN 1: 4 CHỈ SỐ TỔNG QUAN (KPI CARDS)
 # ==============================================================================
-st.markdown("### 1. Chỉ số tổng quan toàn mạch (KPIs)")
+st.markdown("### Chỉ số tổng quan toàn mạch (KPIs)")
 kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
 total_records = len(df_filtered)
-total_routes = len(df_heatmap)
+total_routes = len(df_heatmap_18)
 high_cog_count = len(df_filtered[df_filtered["Mã mức độ"].isin(["VD", "VDC"])])
 high_cog_pct = (
     (high_cog_count / total_records * 100) if total_records > 0 else 0
@@ -168,66 +189,135 @@ avg_depth = (
 
 with kpi1:
     st.metric(
-        label="📌 Tổng số YCCĐ (Records)",
-        value=f"{total_records} / 108",
-        delta=f"Chiếm {total_records/108*100:.1f}% chương trình",
+        "📌 Tổng số YCCĐ (Records)",
+        f"{total_records} / 108",
+        f"Chiếm {total_records/108*100:.1f}% chương trình",
     )
 with kpi2:
     st.metric(
-        label="🗂️ Tuyến nội dung chuẩn hóa",
-        value=f"{total_routes} tuyến",
-        delta="5 nhóm mạch kiến thức",
+        "🗂️ Tuyến nội dung chuẩn hóa",
+        f"{total_routes} tuyến",
+        "5 nhóm mạch kiến thức",
     )
 with kpi3:
     st.metric(
-        label="🧠 Chỉ số độ sâu tư duy TB",
-        value=f"{avg_depth:.2f} / 4.00",
-        delta="Tăng từ 2.00 (L1) → 2.54 (L5)",
+        "🧠 Chỉ số độ sâu tư duy TB",
+        f"{avg_depth:.2f} / 4.00",
+        "Tăng từ 2.00 (L1) → 2.54 (L5)",
     )
 with kpi4:
     st.metric(
-        label="🚀 Tỷ lệ Vận dụng & VDC",
-        value=f"{high_cog_pct:.1f}%",
-        delta=f"{high_cog_count} YCCĐ mức cao",
+        "🚀 Tỷ lệ Vận dụng & VDC",
+        f"{high_cog_pct:.1f}%",
+        f"{high_cog_count} YCCĐ mức cao",
     )
 
 st.divider()
 
 # ==============================================================================
-# PHẦN 2: CÁC TAB TRỰC QUAN HÓA, SƠ ĐỒ TIẾN TRÌNH, TRUY XUẤT & BÁO CÁO
+# PHẦN 2: CÁC TAB THEO ĐÚNG THỨ TỰ: NV 13-14 | NV 15 | NV 16 | NV 17 | NV 18
 # ==============================================================================
-tab1, tab2, tab3, tab4 = st.tabs([
-    "📈 Biểu đồ & Heatmap (NV 16-17)",
-    "🗺️ Bản đồ tiến trình & Tiên quyết (NV 14-15)",
-    "🔍 Bảng truy xuất 108 YCCĐ & Minh chứng (NV 13)",
-    "📝 Báo cáo phương pháp & Câu hỏi bảo vệ",
+tab_13_14, tab_15, tab_16, tab_17, tab_18 = st.tabs([
+    "📋 NV 13 & 14: Mã hóa YCCĐ & Bộ mã Số",
+    "🔗 NV 15: Kiến thức tiên quyết",
+    "📊 NV 16: Ma trận xuất hiện & Mức phát triển",
+    "🗺️ NV 17: Sơ đồ tiến trình & Heatmap",
+    "📝 NV 18 & Báo cáo bảo vệ",
 ])
 
 # ------------------------------------------------------------------------------
-# TAB 1: 2 BIỂU ĐỒ PHÂN TÍCH CHÍNH (PHÂN BỐ & HEATMAP)
+# TAB 1: NV 13 & NV 14 GỘP CHUNG
 # ------------------------------------------------------------------------------
-with tab1:
-    col_chart1, col_chart2 = st.columns([1.1, 1.2])
+with tab_13_14:
+    st.subheader(
+        "Nhiệm vụ 13: Trích xuất & Mã hóa 108 Yêu cầu cần đạt (Minh chứng nguồn)"
+    )
 
-    with col_chart1:
-        st.subheader("Biểu đồ 1: Phân bố YCCĐ & Độ sâu tư duy theo Lớp")
+    col_dl, col_info = st.columns([1, 3])
+    with col_dl:
+        csv_data = df_filtered.to_csv(index=False).encode("utf-8-sig")
+        st.download_button(
+            label="📥 Tải bảng dữ liệu đang lọc (CSV)",
+            data=csv_data,
+            file_name="NV13_Ma_Hoa_108_YCCD.csv",
+            mime="text/csv",
+        )
+    with col_info:
+        st.info(
+            f"Đang hiển thị **{len(df_filtered)} / 108** mã YCCĐ theo bộ lọc"
+            " bên trái."
+        )
+
+    st.dataframe(
+        df_filtered[[
+            "Mã YCCĐ",
+            "Lớp",
+            "Nội dung",
+            "Tiểu mục",
+            "Yêu cầu cần đạt",
+            "Động từ chính",
+            "Mã mức độ",
+            "Thao tác nhận thức",
+            "Điểm nhận thức",
+        ]],
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    st.divider()
+    st.subheader(
+        "Nhiệm vụ 14: Bộ mã hóa Số tự nhiên, Phân số, Số thập phân & Phép tính"
+        " tương ứng"
+    )
+    st.dataframe(df_nv14, use_container_width=True, hide_index=True)
+
+    with st.expander("📖 Xem Quy ước hệ thống mã định danh (NV13 & NV14)"):
+        st.dataframe(df_quyuoc, use_container_width=True, hide_index=True)
+
+# ------------------------------------------------------------------------------
+# TAB 2: NV 15 RIÊNG
+# ------------------------------------------------------------------------------
+with tab_15:
+    st.subheader(
+        "Nhiệm vụ 15: Phân tích quan hệ kiến thức tiên quyết (AI gợi ý có kiểm"
+        " chứng)"
+    )
+    st.markdown(
+        "**1. Bảng tổng hợp mối quan hệ tiên quyết trực tiếp từ Lớp 1 đến"
+        " Lớp 5:**"
+    )
+    st.dataframe(df_nv15_tq, use_container_width=True, hide_index=True)
+
+    col_15a, col_15b = st.columns(2)
+    with col_15a:
+        st.markdown("**2. Tuyến mở rộng Phạm vi số & Cấu tạo thập phân:**")
+        st.dataframe(df_nv15_pvs, use_container_width=True, hide_index=True)
+    with col_15b:
+        st.markdown("**3. Tuyến Kỹ thuật phép tính, Biểu thức & Giải toán:**")
+        st.dataframe(df_nv15_pt, use_container_width=True, hide_index=True)
+
+    with st.expander("📚 Văn bản căn cứ & Tài liệu kiểm chứng (NV15)"):
+        st.dataframe(df_nv15_tc, use_container_width=True, hide_index=True)
+
+# ------------------------------------------------------------------------------
+# TAB 3: NV 16 RIÊNG
+# ------------------------------------------------------------------------------
+with tab_16:
+    st.subheader(
+        "Nhiệm vụ 16: Ma trận xuất hiện và Mức độ phát triển theo khối lớp"
+    )
+
+    col_16_chart1, col_16_chart2 = st.columns(2)
+
+    with col_16_chart1:
+        st.markdown("**Biểu đồ 1: Phân bố YCCĐ theo Khối lớp & Mức độ nhận thức**")
         if not df_filtered.empty:
-            # Gom nhóm dữ liệu theo Lớp và Mã mức độ
             dist_df = (
                 df_filtered.groupby(["Lớp", "Mã mức độ"])
                 .size()
                 .reset_index(name="Số lượng")
             )
             dist_df["Lớp_Label"] = "Lớp " + dist_df["Lớp"].astype(str)
-
-            # Tính điểm độ sâu trung bình theo lớp
-            depth_df = (
-                df_filtered.groupby("Lớp")["Điểm nhận thức"]
-                .mean()
-                .reset_index()
-            )
-            depth_df["Lớp_Label"] = "Lớp " + depth_df["Lớp"].astype(str)
-
             color_map = {
                 "NB": "#636EFA",
                 "TH": "#00CC96",
@@ -250,66 +340,72 @@ with tab1:
             )
             fig_bar.update_layout(
                 barmode="stack",
-                height=430,
+                height=380,
                 legend=dict(orientation="h", y=1.12),
             )
             st.plotly_chart(fig_bar, use_container_width=True)
+        else:
+            st.warning("Không có dữ liệu phù hợp với bộ lọc.")
 
-            # Biểu đồ đường chỉ số độ sâu tư duy
+    with col_16_chart2:
+        st.markdown(
+            "**Biểu đồ 2: Chỉ số độ sâu tư duy trung bình qua các lớp (Thang"
+            " 1–4)**"
+        )
+        if not df_filtered.empty:
+            depth_df = (
+                df_filtered.groupby("Lớp")["Điểm nhận thức"]
+                .mean()
+                .reset_index()
+            )
+            depth_df["Lớp_Label"] = "Lớp " + depth_df["Lớp"].astype(str)
             fig_line = px.line(
                 depth_df,
                 x="Lớp_Label",
                 y="Điểm nhận thức",
                 markers=True,
                 text=depth_df["Điểm nhận thức"].round(2),
-                title="Xu hướng Chỉ số độ sâu tư duy trung bình (Thang 1–4)",
+                labels={
+                    "Lớp_Label": "Khối lớp",
+                    "Điểm nhận thức": "Chỉ số độ sâu TB",
+                },
             )
             fig_line.update_traces(
                 textposition="top center",
                 line=dict(color="#AB63FA", width=3),
+                marker=dict(size=10),
             )
             fig_line.update_yaxes(range=[1.5, 3.0])
-            fig_line.update_layout(height=260)
+            fig_line.update_layout(height=380)
             st.plotly_chart(fig_line, use_container_width=True)
-        else:
-            st.warning("Không có dữ liệu phù hợp với bộ lọc hiện tại.")
 
-    with col_chart2:
-        st.subheader("Biểu đồ 2: Heatmap mật độ 18 Tuyến nội dung (Lớp 1–5)")
-        z_data = df_heatmap[
-            ["Lớp 1", "Lớp 2", "Lớp 3", "Lớp 4", "Lớp 5"]
-        ].values
-        y_labels = df_heatmap["Tuyến nội dung chuẩn hóa"].tolist()
-        x_labels = ["Lớp 1", "Lớp 2", "Lớp 3", "Lớp 4", "Lớp 5"]
-
-        fig_heat = go.Figure(
-            data=go.Heatmap(
-                z=z_data,
-                x=x_labels,
-                y=y_labels,
-                colorscale="YlGnBu",
-                text=z_data,
-                texttemplate="%{text}",
-                textfont={"size": 11},
-                colorbar=dict(title="Số YCCĐ"),
-            )
-        )
-        fig_heat.update_layout(
-            height=710,
-            yaxis=dict(autorange="reversed"),
-            margin=dict(l=10, r=10, t=30, b=10),
-        )
-        st.plotly_chart(fig_heat, use_container_width=True)
-
-# ------------------------------------------------------------------------------
-# TAB 2: BẢN ĐỒ TIẾN TRÌNH & MỐI QUAN HỆ KIẾN THỨC TIÊN QUYẾT
-# ------------------------------------------------------------------------------
-with tab2:
-    st.subheader(
-        "Sơ đồ luồng kế thừa kiến thức tiên quyết (Lớp 1 → Lớp 5)"
+    st.markdown(
+        "**Bảng 1: Ma trận tần suất xuất hiện YCCĐ theo 5 nhóm mạch kiến"
+        " thức:**"
     )
+    st.dataframe(df_nv16_mach, use_container_width=True, hide_index=True)
 
-    # Trực quan hóa luồng tiến trình bằng Graphviz DOT
+    st.markdown(
+        "**Bảng 2: Ma trận phát triển thao tác nhận thức & Chỉ số độ sâu tư"
+        " duy:**"
+    )
+    st.dataframe(df_nv16_nhan_thuc, use_container_width=True, hide_index=True)
+
+    with st.expander(
+        "🔍 Xem Bảng ánh xạ 108 Mã YCCĐ vào Ma trận phát triển (NV16)"
+    ):
+        st.dataframe(df_nv16_truyxuat, use_container_width=True, hide_index=True)
+
+# ------------------------------------------------------------------------------
+# TAB 4: NV 17 RIÊNG
+# ------------------------------------------------------------------------------
+with tab_17:
+    st.subheader("Nhiệm vụ 17: Thiết kế Sơ đồ tiến trình và Heatmap")
+
+    st.markdown(
+        "**Phần 1: Bản đồ tiến trình phát triển mạch Số và phép tính (Lớp 1 →"
+        " Lớp 5)**"
+    )
     progression_dot = """
     digraph G {
         rankdir=LR;
@@ -355,70 +451,89 @@ with tab2:
     """
     st.graphviz_chart(progression_dot, use_container_width=True)
 
-    st.markdown("#### Ma trận quan hệ tiên quyết & Giới hạn kỹ thuật (NV15)")
-    st.dataframe(df_nv15_tq, use_container_width=True, hide_index=True)
+    st.divider()
+    st.markdown("**Phần 2: Heatmap mật độ YCCĐ qua các khối lớp**")
+    col_h1, col_h2 = st.columns([1.4, 1])
 
-    with st.expander(
-        "Xem chi tiết Tuyến Phạm vi số & Kỹ thuật phép tính (NV14 & NV15)"
-    ):
-        st.markdown("**Bộ mã hóa nhóm Số và Phép tính (NV14):**")
-        st.dataframe(df_nv14, use_container_width=True, hide_index=True)
-        st.markdown("**Chi tiết Tuyến Phạm vi số (NV15):**")
-        st.dataframe(df_nv15_pvs, use_container_width=True, hide_index=True)
+    with col_h1:
+        st.caption("Heatmap 1: Mật độ 18 Tuyến nội dung chuẩn hóa (Lớp 1–5)")
+        z_data_18 = df_heatmap_18[
+            ["Lớp 1", "Lớp 2", "Lớp 3", "Lớp 4", "Lớp 5"]
+        ].values
+        y_labels_18 = df_heatmap_18["Tuyến nội dung chuẩn hóa"].tolist()
+        x_labels = ["Lớp 1", "Lớp 2", "Lớp 3", "Lớp 4", "Lớp 5"]
 
-# ------------------------------------------------------------------------------
-# TAB 3: BẢNG TRUY XUẤT DỮ LIỆU & MINH CHỨNG NGUỒN (YÊU CẦU TỐI THIỂU)
-# ------------------------------------------------------------------------------
-with tab3:
-    st.subheader(
-        f"Bảng truy xuất minh chứng YCCĐ (Đang hiển thị: {len(df_filtered)} / 108"
-        " mã)"
-    )
+        fig_heat18 = go.Figure(
+            data=go.Heatmap(
+                z=z_data_18,
+                x=x_labels,
+                y=y_labels_18,
+                colorscale="YlGnBu",
+                text=z_data_18,
+                texttemplate="%{text}",
+                textfont={"size": 11},
+                colorbar=dict(title="YCCĐ"),
+            )
+        )
+        fig_heat18.update_layout(
+            height=680,
+            yaxis=dict(autorange="reversed"),
+            margin=dict(l=10, r=10, t=20, b=10),
+        )
+        st.plotly_chart(fig_heat18, use_container_width=True)
 
-    # Nút tải dữ liệu đã lọc
-    csv_data = df_filtered.to_csv(index=False).encode("utf-8-sig")
-    st.download_button(
-        label="📥 Tải xuống bảng dữ liệu đang lọc (CSV)",
-        data=csv_data,
-        file_name="Truy_Xuat_YCCD_Toan_1_5.csv",
-        mime="text/csv",
-    )
+    with col_h2:
+        st.caption(
+            "Heatmap 2: Mật độ 4 Thao tác nhận thức (NB, TH, VD, VDC)"
+        )
+        z_data_cog = df_heatmap_cog[
+            ["Lớp 1", "Lớp 2", "Lớp 3", "Lớp 4", "Lớp 5"]
+        ].values
+        y_labels_cog = df_heatmap_cog["Mã mức độ"].tolist()
 
-    st.dataframe(
-        df_filtered[[
-            "Mã YCCĐ",
-            "Lớp",
-            "Nội dung",
-            "Tiểu mục",
-            "Yêu cầu cần đạt",
-            "Động từ chính",
-            "Mã mức độ",
-            "Thao tác nhận thức",
-            "Điểm nhận thức",
-        ]],
-        use_container_width=True,
-        hide_index=True,
-    )
-
-    with st.expander(
-        "📖 Quy ước hệ thống mã định danh & Nguồn pháp lý chương trình"
-    ):
-        st.dataframe(df_quyuoc, use_container_width=True, hide_index=True)
-        st.info(
-            "**Căn cứ pháp lý:** Chương trình Giáo dục phổ thông 2018 môn Toán"
-            " (Ban hành kèm theo Thông tư số 32/2018/TT-BGDĐT ngày"
-            " 26/12/2018 của Bộ GD&ĐT). Đối chiếu SGK Toán 1–5 bộ *Kết nối"
-            " tri thức với cuộc sống*."
+        fig_heat_cog = go.Figure(
+            data=go.Heatmap(
+                z=z_data_cog,
+                x=x_labels,
+                y=y_labels_cog,
+                colorscale="OrRd",
+                text=z_data_cog,
+                texttemplate="%{text}",
+                textfont={"size": 14},
+                colorbar=dict(title="YCCĐ"),
+            )
+        )
+        fig_heat_cog.update_layout(
+            height=380,
+            yaxis=dict(autorange="reversed"),
+            margin=dict(l=10, r=10, t=20, b=10),
+        )
+        st.plotly_chart(fig_heat_cog, use_container_width=True)
+        st.dataframe(
+            df_heatmap_cog[[
+                "Mã mức độ",
+                "Lớp 1",
+                "Lớp 2",
+                "Lớp 3",
+                "Lớp 4",
+                "Lớp 5",
+                "Tổng YCCĐ",
+            ]],
+            use_container_width=True,
+            hide_index=True,
         )
 
 # ------------------------------------------------------------------------------
-# TAB 4: BÁO CÁO PHƯƠNG PHÁP & TRẢ LỜI CÂU HỎI BẢO VỆ
+# TAB 5: NV 18 & BÁO CÁO BẢO VỆ
 # ------------------------------------------------------------------------------
-with tab4:
-    st.subheader("🎓 Trả lời câu hỏi bảo vệ đề tài")
+with tab_18:
+    st.subheader(
+        "Nhiệm vụ 18: Phân tích sự mở rộng phạm vi, tính đồng tâm và chiều sâu"
+        " kiến thức"
+    )
     st.success(
-        "**Câu hỏi:** *Mạch Số và phép tính thể hiện nguyên tắc đồng tâm ra"
-        " sao?*"
+        "**Câu hỏi bảo vệ:** *Mạch Số và phép tính thể hiện nguyên tắc đồng"
+        " tâm ra sao?*"
     )
 
     st.markdown("""
@@ -445,9 +560,9 @@ with tab4:
     """)
 
     st.divider()
-    st.subheader("🛠️ Báo cáo phương pháp thực hiện & Kiểm chứng AI")
+    st.subheader("🛠️ Báo cáo giải thích phương pháp & Kiểm chứng AI")
     st.markdown("""
     - **Bước 1 – Trích xuất & Mã hóa (NV13, NV14):** Rà soát toàn văn Thông tư 32/2018/TT-BGDĐT, bóc tách thành **108 YCCĐ** độc lập và gắn mã định danh theo cấu trúc `[Lớp]_[Mạch]_[Mức độ]_[STT]`.
-    - **Bước 2 – Phân tích quan hệ tiên quyết với AI có kiểm chứng (NV15):** Sử dụng AI gợi ý cây phụ thuộc kiến thức giữa các lớp, sau đó đối chiếu thủ công với SGK *Kết nối tri thức với cuộc sống* để loại bỏ các suy diễn vượt chuẩn chương trình (ví dụ: xác nhận Lớp 1 chưa học phép nhân/chia; Lớp 3 mới dừng ở phân số trực quan).
-    - **Bước 3 – Định lượng & Trực quan hóa (NV16, NV17):** Gán trọng số nhận thức ($NB=1, TH=2, VD=3, VDC=4$), xây dựng ma trận tần suất 18 tuyến nội dung và biểu diễn trên dashboard Streamlit.
+    - **Bước 2 – Phân tích quan hệ tiên quyết với AI có kiểm chứng (NV15):** Sử dụng AI gợi ý cây phụ thuộc kiến thức giữa các lớp, sau đó đối chiếu thủ công với SGK *Kết nối tri thức với cuộc sống* để loại bỏ các suy diễn vượt chuẩn chương trình.
+    - **Bước 3 – Định lượng & Trực quan hóa (NV16, NV17, NV18):** Gán trọng số nhận thức ($NB=1, TH=2, VD=3, VDC=4$), xây dựng ma trận tần suất 18 tuyến nội dung và biểu diễn trên dashboard Streamlit.
     """)
