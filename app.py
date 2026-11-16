@@ -28,7 +28,7 @@ def load_all_data():
     # 1. File NV 13,14.xlsx
     df_yccd = pd.read_excel("NV 13,14.xlsx", sheet_name="NV13_Ma_Hoa_YCCD")
     df_nv14 = pd.read_excel(
-        "NV 13,14.xlsx", sheet_name="NV14_Bo_Ma_So_Phep_Tinh", skiprows=2
+        "NV 13,14.xlsx", sheet_name="Bo_Ma_So_Phep_Tinh", skiprows=2
     )
     df_quyuoc = pd.read_excel(
         "NV 13,14.xlsx", sheet_name="Quy_Uoc_Ma_Hoa", skiprows=2
@@ -218,11 +218,11 @@ st.divider()
 # PHẦN 2: CÁC TAB THEO ĐÚNG THỨ TỰ: NV 13-14 | NV 15 | NV 16 | NV 17 | NV 18
 # ==============================================================================
 tab_13_14, tab_15, tab_16, tab_17, tab_18 = st.tabs([
-    "📋 NV 13 & 14: Mã hóa YCCĐ & Bộ mã Số",
-    "🔗 NV 15: Kiến thức tiên quyết",
-    "📊 NV 16: Ma trận xuất hiện & Mức phát triển",
-    "🗺️ NV 17: Sơ đồ tiến trình & Heatmap",
-    "📝 NV 18 & Báo cáo bảo vệ",
+    "📋  Mã hóa YCCĐ & Bộ mã Số",
+    "🔗  Kiến thức tiên quyết",
+    "📊  Ma trận xuất hiện & Mức phát triển",
+    "🗺️  Sơ đồ tiến trình & Heatmap",
+    "📝  Báo cáo bảo vệ",
 ])
 
 # ------------------------------------------------------------------------------
@@ -230,7 +230,7 @@ tab_13_14, tab_15, tab_16, tab_17, tab_18 = st.tabs([
 # ------------------------------------------------------------------------------
 with tab_13_14:
     st.subheader(
-        "Nhiệm vụ 13: Trích xuất & Mã hóa 108 Yêu cầu cần đạt (Minh chứng nguồn)"
+        "Trích xuất & Mã hóa 108 Yêu cầu cần đạt (Minh chứng nguồn)"
     )
 
     col_dl, col_info = st.columns([1, 3])
@@ -266,12 +266,12 @@ with tab_13_14:
 
     st.divider()
     st.subheader(
-        "Nhiệm vụ 14: Bộ mã hóa Số tự nhiên, Phân số, Số thập phân & Phép tính"
+        " Bộ mã hóa Số tự nhiên, Phân số, Số thập phân & Phép tính"
         " tương ứng"
     )
     st.dataframe(df_nv14, use_container_width=True, hide_index=True)
 
-    with st.expander("📖 Xem Quy ước hệ thống mã định danh (NV13 & NV14)"):
+    with st.expander("📖 Xem Quy ước hệ thống mã định danh "):
         st.dataframe(df_quyuoc, use_container_width=True, hide_index=True)
 
 # ------------------------------------------------------------------------------
@@ -279,7 +279,7 @@ with tab_13_14:
 # ------------------------------------------------------------------------------
 with tab_15:
     st.subheader(
-        "Nhiệm vụ 15: Phân tích quan hệ kiến thức tiên quyết (AI gợi ý có kiểm"
+        " Phân tích quan hệ kiến thức tiên quyết (AI gợi ý có kiểm"
         " chứng)"
     )
     st.markdown(
@@ -296,7 +296,7 @@ with tab_15:
         st.markdown("**3. Tuyến Kỹ thuật phép tính, Biểu thức & Giải toán:**")
         st.dataframe(df_nv15_pt, use_container_width=True, hide_index=True)
 
-    with st.expander("📚 Văn bản căn cứ & Tài liệu kiểm chứng (NV15)"):
+    with st.expander("📚 Văn bản căn cứ & Tài liệu kiểm chứng "):
         st.dataframe(df_nv15_tc, use_container_width=True, hide_index=True)
 
 # ------------------------------------------------------------------------------
@@ -304,7 +304,7 @@ with tab_15:
 # ------------------------------------------------------------------------------
 with tab_16:
     st.subheader(
-        "Nhiệm vụ 16: Ma trận xuất hiện và Mức độ phát triển theo khối lớp"
+        " Ma trận xuất hiện và Mức độ phát triển theo khối lớp"
     )
 
     col_16_chart1, col_16_chart2 = st.columns(2)
@@ -392,7 +392,7 @@ with tab_16:
     st.dataframe(df_nv16_nhan_thuc, use_container_width=True, hide_index=True)
 
     with st.expander(
-        "🔍 Xem Bảng ánh xạ 108 Mã YCCĐ vào Ma trận phát triển (NV16)"
+        "🔍 Xem Bảng ánh xạ 108 Mã YCCĐ vào Ma trận phát triển "
     ):
         st.dataframe(df_nv16_truyxuat, use_container_width=True, hide_index=True)
 
@@ -400,7 +400,7 @@ with tab_16:
 # TAB 4: NV 17 RIÊNG
 # ------------------------------------------------------------------------------
 with tab_17:
-    st.subheader("Nhiệm vụ 17: Thiết kế Sơ đồ tiến trình và Heatmap")
+    st.subheader( Thiết kế Sơ đồ tiến trình và Heatmap")
 
     st.markdown(
         "**Phần 1: Bản đồ tiến trình phát triển mạch Số và phép tính (Lớp 1 →"
@@ -528,7 +528,7 @@ with tab_17:
 # ------------------------------------------------------------------------------
 with tab_18:
     st.subheader(
-        "Nhiệm vụ 18: Phân tích sự mở rộng phạm vi, tính đồng tâm và chiều sâu"
+        "Phân tích sự mở rộng phạm vi, tính đồng tâm và chiều sâu"
         " kiến thức"
     )
     st.success(
