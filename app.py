@@ -685,39 +685,82 @@ with tab_3:
 
     col_16_chart1, col_16_chart2 = st.columns(2)
 
-    with col_16_chart1:
+      with col_16_chart1:
         st.markdown("**Biểu đồ 1: Phân bố YCCĐ theo Khối lớp & Mức độ nhận thức**")
         if not df_filtered.empty:
+            grade_order = sorted(df_filtered["Lớp"].dropna().unique())
+
             dist_df = (
                 df_filtered.groupby(["Lớp", "Mã mức độ"])
                 .size()
-                .reset_index(name="Số lượng")
+                .unstack(fill_value=0)
+                .reindex(index=grade_order, columns=selected_levels, fill_value=0)
             )
-            dist_df["Lớp_Label"] = "Lớp " + dist_df["Lớp"].astype(str)
-            color_map = {
-                "NB": "#636EFA",
-                "TH": "#00CC96",
-                "VD": "#FFA15A",
-                "VDC": "#EF553B",
+
+            level_labels_chart = {
+                "NB": "Nhận biết (NB)<br>[Trọng số = 1]",
+                "TH": "Thông hiểu (TH)<br>[Trọng số = 2]",
+                "VD": "Vận dụng (VD)<br>[Trọng số = 3]",
+                "VDC": "Vận dụng cao (VDC)<br>[Trọng số = 4]",
             }
-            fig_bar = px.bar(
-                dist_df,
-                x="Lớp_Label",
-                y="Số lượng",
-                color="Mã mức độ",
-                color_discrete_map=color_map,
-                category_orders={"Mã mức độ": ["NB", "TH", "VD", "VDC"]},
-                text="Số lượng",
-                labels={
-                    "Lớp_Label": "Khối lớp",
-                    "Số lượng": "Số lượng YCCĐ",
-                    "Mã mức độ": "Mức độ",
-                },
-            )
+            color_map = {
+                "NB": "#81D4FA",
+                "TH": "#29B6F6",
+                "VD": "#FFB81C",
+                "VDC": "#F66C70",
+            }
+
+            fig_bar = go.Figure()
+            for level in selected_levels:
+                if level in dist_df.columns:
+                    fig_bar.add_trace(
+                        go.Bar(
+                            x=[f"Lớp {grade}" for grade in grade_order],
+                            y=dist_df[level].tolist(),
+                            name=level_labels_chart[level],
+                            marker_color=color_map[level],
+                            hovertemplate=(
+                                "%{x}<br>"
+                                + level
+                                + ": %{y} YCCĐ<extra></extra>"
+                            ),
+                        )
+                    )
+
+            max_count = int(dist_df.sum(axis=1).max())
+            y_max = max(35, ((max_count + 4) // 5) * 5)
+
             fig_bar.update_layout(
+                title=dict(
+                    text="Cơ cấu Mức độ Nhận thức (YCCĐ) qua các lớp 1–5",
+                    x=0.5,
+                    xanchor="center",
+                    font=dict(size=22),
+                ),
                 barmode="stack",
-                height=380,
-                legend=dict(orientation="h", y=1.12),
+                height=430,
+                bargap=0.25,
+                xaxis=dict(
+                    title="Khối lớp",
+                    categoryorder="array",
+                    categoryarray=[f"Lớp {grade}" for grade in grade_order],
+                ),
+                yaxis=dict(
+                    title="Số lượng YCCĐ",
+                    range=[0, y_max],
+                    dtick=5,
+                    gridcolor="#999999",
+                    zeroline=False,
+                ),
+                legend=dict(
+                    orientation="v",
+                    x=1.02,
+                    y=0.5,
+                    xanchor="left",
+                    yanchor="middle",
+                    font=dict(size=12),
+                ),
+                margin=dict(l=55, r=180, t=75, b=55),
             )
             st.plotly_chart(fig_bar, use_container_width=True)
         else:
