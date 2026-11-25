@@ -768,36 +768,79 @@ with tab_3:
 
     with col_16_chart2:
         st.markdown(
-            "**Biểu đồ 2: Chỉ số độ sâu tư duy trung bình qua các lớp (Thang"
-            " 1–4)**"
+            "**Biểu đồ 2: Sự dịch chuyển tỷ trọng nhóm mạch nội dung từ Lớp 1 đến Lớp 5**"
         )
-        if not df_filtered.empty:
-            depth_df = (
-                df_filtered.groupby("Lớp")["Điểm nhận thức"]
-                .mean()
-                .reset_index()
-            )
-            depth_df["Lớp_Label"] = "Lớp " + depth_df["Lớp"].astype(str)
-            fig_line = px.line(
-                depth_df,
-                x="Lớp_Label",
-                y="Điểm nhận thức",
-                markers=True,
-                text=depth_df["Điểm nhận thức"].round(2),
-                labels={
-                    "Lớp_Label": "Khối lớp",
-                    "Điểm nhận thức": "Chỉ số độ sâu TB",
-                },
-            )
-            fig_line.update_traces(
-                textposition="top center",
-                line=dict(color="#AB63FA", width=3),
-                marker=dict(size=10),
-            )
-            fig_line.update_yaxes(range=[1.5, 3.0])
-            fig_line.update_layout(height=380)
-            st.plotly_chart(fig_line, use_container_width=True)
 
+        grade_order = sorted(selected_grades)
+        topic_order = [
+            topic
+            for topic in df_yccd["Nội dung"].dropna().drop_duplicates().tolist()
+            if topic in selected_topics
+        ]
+
+        topic_grade_pivot = (
+            df_filtered.groupby(["Nội dung", "Lớp"])
+            .size()
+            .unstack(fill_value=0)
+            .reindex(index=topic_order, columns=grade_order, fill_value=0)
+        )
+
+        if not topic_grade_pivot.empty:
+            grade_colors = {
+                1: "#4F81BD",
+                2: "#C0504D",
+                3: "#9BBB59",
+                4: "#8064A2",
+                5: "#4BACC6",
+            }
+
+            fig_topics = go.Figure()
+            for grade in grade_order:
+                fig_topics.add_trace(
+                    go.Bar(
+                        x=topic_grade_pivot.index.tolist(),
+                        y=topic_grade_pivot[grade].tolist(),
+                        name=f"Lớp {grade}",
+                        marker_color=grade_colors.get(grade, "#888888"),
+                    )
+                )
+
+            max_count = int(topic_grade_pivot.sum(axis=1).max())
+            y_max = max(5, ((max_count + 4) // 5) * 5)
+
+            fig_topics.update_layout(
+                title=dict(
+                    text=(
+                        "Sự dịch chuyển Tỷ trọng Nhóm mạch Nội dung "
+                        "từ Lớp 1 đến Lớp 5"
+                    ),
+                    x=0.5,
+                    xanchor="center",
+                    font=dict(size=20),
+                ),
+                barmode="stack",
+                height=460,
+                xaxis=dict(
+                    title="Khối lớp",
+                    tickangle=-45,
+                    automargin=True,
+                ),
+                yaxis=dict(
+                    title="Số lượng YCCĐ",
+                    range=[0, y_max],
+                    dtick=5,
+                    gridcolor="#999999",
+                ),
+                legend=dict(
+                    title="",
+                    traceorder="reversed",
+                    orientation="v",
+                ),
+                margin=dict(l=55, r=20, t=75, b=110),
+            )
+            st.plotly_chart(fig_topics, use_container_width=True)
+        else:
+            st.warning("Không có dữ liệu phù hợp với bộ lọc.")
     st.markdown(
         "**Bảng 1: Ma trận tần suất xuất hiện YCCĐ theo 5 nhóm mạch kiến"
         " thức:**"
