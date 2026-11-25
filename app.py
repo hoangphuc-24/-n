@@ -678,276 +678,196 @@ with tab_2:
         st.dataframe(df_nv15_tc, use_container_width=True, hide_index=True)
 
 # ------------------------------------------------------------------------------
-# TAB 3: MA TRẬN XUẤT HIỆN & MỨC PHÁT TRIỂN
+# ------------------------------------------------------------------------------
+# TAB 3: MA TRẬN XUẤT HIỆN & MỨC PHÁT TRIỂN (DỮ LIỆU TRỰC TIẾP TỪ NV16)
 # ------------------------------------------------------------------------------
 with tab_3:
     st.subheader("Ma trận xuất hiện và Mức độ phát triển theo khối lớp")
 
+    # Chuẩn hóa dữ liệu trực tiếp từ 2 bảng của NV16.xlsx
+    df_nt_plot = df_nv16_nhan_thuc[
+        df_nv16_nhan_thuc["Khối lớp"] != "Toàn cấp"
+    ].copy()
+    df_mach_plot = df_nv16_mach[
+        df_nv16_mach["Nhóm mạch kiến thức"] != "TỔNG CỘNG YCCĐ TOÀN MẠCH"
+    ].copy()
+
     col_16_chart1, col_16_chart2 = st.columns(2)
 
+    # === BIỂU ĐỒ 1: CƠ CẤU MỨC ĐỘ NHẬN THỨC QUA CÁC LỚP 1–5 (TỪ BẢNG 2 NV16) ===
     with col_16_chart1:
         st.markdown(
             "**Biểu đồ 1: Phân bố YCCĐ theo Khối lớp & Mức độ nhận thức**"
         )
 
-        if not df_filtered.empty:
-            grade_order = sorted(
-                df_filtered["Lớp"].dropna().unique().tolist()
-            )
+        # Lấy đúng tên cột thực tế từ df_nv16_nhan_thuc (tránh lỗi ký tự xuống dòng \n)
+        nb_col = [c for c in df_nt_plot.columns if "NB" in c][0]
+        th_col = [c for c in df_nt_plot.columns if "TH" in c][0]
+        vd_col = [c for c in df_nt_plot.columns if "(VD)" in c][0]
+        vdc_col = [c for c in df_nt_plot.columns if "VDC" in c][0]
 
-            dist_df = (
-                df_filtered
-                .groupby(["Lớp", "Mã mức độ"])
-                .size()
-                .unstack(fill_value=0)
-                .reindex(
-                    index=grade_order,
-                    columns=["NB", "TH", "VD", "VDC"],
-                    fill_value=0,
-                )
-            )
+        levels_config = [
+            (nb_col, "Nhận biết (NB)<br>[Trọng số = 1]", "#81D4FA"),
+            (th_col, "Thông hiểu (TH)<br>[Trọng số = 2]", "#29B6F6"),
+            (vd_col, "Vận dụng (VD)<br>[Trọng số = 3]", "#FFB81C"),
+            (vdc_col, "Vận dụng cao (VDC)<br>[Trọng số = 4]", "#F66C70"),
+        ]
 
-            level_labels = {
-                "NB": "Nhận biết (NB)<br>[Trọng số = 1]",
-                "TH": "Thông hiểu (TH)<br>[Trọng số = 2]",
-                "VD": "Vận dụng (VD)<br>[Trọng số = 3]",
-                "VDC": "Vận dụng cao (VDC)<br>[Trọng số = 4]",
-            }
-
-            color_map = {
-                "NB": "#81D4FA",
-                "TH": "#29B6F6",
-                "VD": "#FFB81C",
-                "VDC": "#F66C70",
-            }
-
-            fig_bar = go.Figure()
-
-            for level in ["NB", "TH", "VD", "VDC"]:
-                fig_bar.add_trace(
-                    go.Bar(
-                        x=[f"Lớp {grade}" for grade in grade_order],
-                        y=dist_df[level].tolist(),
-                        name=level_labels[level],
-                        marker=dict(color=color_map[level]),
-                        text=dist_df[level].tolist(),
-                        textposition="none",
-                        hovertemplate=(
-                            "%{x}<br>"
-                            f"{level}: %{{y}} YCCĐ"
-                            "<extra></extra>"
-                        ),
-                    )
-                )
-
-            max_total = int(dist_df.sum(axis=1).max())
-
-            fig_bar.update_layout(
-                title=dict(
-                    text=(
-                        "Cơ cấu Mức độ Nhận thức (YCCĐ) "
-                        "qua các lớp 1–5"
+        fig_bar = go.Figure()
+        for col_name, legend_label, color_hex in levels_config:
+            y_vals = pd.to_numeric(df_nt_plot[col_name], errors="coerce").fillna(0).tolist()
+            fig_bar.add_trace(
+                go.Bar(
+                    x=df_nt_plot["Khối lớp"].tolist(),
+                    y=y_vals,
+                    name=legend_label,
+                    marker=dict(
+                        color=color_hex,
+                        line=dict(color="white", width=1),
                     ),
-                    x=0.5,
-                    xanchor="center",
-                    font=dict(size=22),
-                ),
-                barmode="stack",
-                height=430,
-                bargap=0.30,
-                xaxis=dict(
-                    title="Khối lớp",
-                    categoryorder="array",
-                    categoryarray=[
-                        f"Lớp {grade}" for grade in grade_order
-                    ],
-                ),
-                yaxis=dict(
-                    title="Số lượng YCCĐ",
-                    range=[0, max(35, max_total + 5)],
-                    dtick=5,
-                    gridcolor="#999999",
-                    zeroline=False,
-                ),
-                legend=dict(
-                    orientation="v",
-                    x=1.02,
-                    y=0.5,
-                    xanchor="left",
-                    yanchor="middle",
-                    traceorder="normal",
-                ),
-                margin=dict(l=55, r=180, t=75, b=55),
+                    text=[str(int(v)) if v > 0 else "" for v in y_vals],
+                    textposition="inside",
+                    insidetextanchor="middle",
+                    textfont=dict(color="#1E293B", size=11),
+                    hovertemplate="%{x}<br>" + legend_label.replace("<br>", " ") + ": %{y} YCCĐ<extra></extra>",
+                )
             )
 
-            st.plotly_chart(
-                fig_bar,
-                use_container_width=True,
-            )
-        else:
-            st.warning("Không có dữ liệu phù hợp với bộ lọc.")
+        fig_bar.update_layout(
+            title=dict(
+                text="Cơ cấu Mức độ Nhận thức (YCCĐ) qua các lớp 1–5",
+                x=0.5,
+                xanchor="center",
+                font=dict(size=18, color="#0F172A"),
+            ),
+            barmode="stack",
+            template="plotly_white",
+            height=460,
+            bargap=0.32,
+            xaxis=dict(
+                title="Khối lớp",
+                categoryorder="array",
+                categoryarray=["Lớp 1", "Lớp 2", "Lớp 3", "Lớp 4", "Lớp 5"],
+            ),
+            yaxis=dict(
+                title="Số lượng YCCĐ",
+                range=[0, 35],
+                dtick=5,
+                gridcolor="#CBD5E1",
+                zeroline=True,
+                zerolinecolor="#94A3B8",
+            ),
+            legend=dict(
+                orientation="v",
+                x=1.02,
+                y=0.5,
+                xanchor="left",
+                yanchor="middle",
+            ),
+            margin=dict(l=55, r=165, t=70, b=55),
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
 
+    # === BIỂU ĐỒ 2: SỰ DỊCH CHUYỂN TỶ TRỌNG NHÓM MẠCH NỘI DUNG (TỪ BẢNG 1 NV16) ===
     with col_16_chart2:
         st.markdown(
-            "**Biểu đồ 2: Sự dịch chuyển tỷ trọng nhóm mạch nội dung "
-            "từ Lớp 1 đến Lớp 5**"
+            "**Biểu đồ 2: Sự dịch chuyển tỷ trọng nhóm mạch nội dung từ Lớp 1 đến Lớp 5**"
         )
 
-        if not df_filtered.empty:
-            topic_order = [
-                "I. Số tự nhiên",
-                "II. Các phép tính với Số Tự nhiên",
-                "III. Phân số & Phép tính với Phân số",
-                "IV. Số thập phân & Phép tính với Số thập phân",
-                "V. Tỉ số, Tỉ số phần trăm & Ứng dụng",
-            ]
+        grade_cols = ["Lớp 1", "Lớp 2", "Lớp 3", "Lớp 4", "Lớp 5"]
+        grade_colors = {
+            "Lớp 1": "#5DADE2",
+            "Lớp 2": "#EC7063",
+            "Lớp 3": "#58D68D",
+            "Lớp 4": "#AF7AC5",
+            "Lớp 5": "#33C3F0",
+        }
 
-            available_topics = (
-                df_filtered["Nội dung"].dropna().unique().tolist()
-            )
-
-            plot_topics = [
-                topic for topic in topic_order
-                if topic in available_topics
-            ]
-
-            plot_topics.extend(
-                topic for topic in available_topics
-                if topic not in plot_topics
-            )
-
-            topic_grade_data = (
-                df_filtered
-                .groupby(["Nội dung", "Lớp"])
-                .size()
-                .unstack(fill_value=0)
-                .reindex(
-                    index=plot_topics,
-                    columns=sorted(
-                        df_filtered["Lớp"].dropna().unique().tolist()
+        fig_topics = go.Figure()
+        for g_col in grade_cols:
+            y_vals = pd.to_numeric(df_mach_plot[g_col], errors="coerce").fillna(0).tolist()
+            fig_topics.add_trace(
+                go.Bar(
+                    x=df_mach_plot["Nhóm mạch kiến thức"].tolist(),
+                    y=y_vals,
+                    name=g_col,
+                    marker=dict(
+                        color=grade_colors[g_col],
+                        line=dict(color="white", width=1),
                     ),
-                    fill_value=0,
+                    text=[str(int(v)) if v > 0 else "" for v in y_vals],
+                    textposition="inside",
+                    insidetextanchor="middle",
+                    textfont=dict(color="#1E293B", size=11),
+                    hovertemplate="<b>%{x}</b><br>" + g_col + ": %{y} YCCĐ<extra></extra>",
                 )
             )
 
-            grade_colors = {
-                1: "#5DADE2",
-                2: "#EC7063",
-                3: "#58D68D",
-                4: "#AF7AC5",
-                5: "#33C3F0",
-            }
-
-            fig_topics = go.Figure()
-
-            for grade in sorted(topic_grade_data.columns):
-                fig_topics.add_trace(
-                    go.Bar(
-                        x=plot_topics,
-                        y=topic_grade_data[grade].tolist(),
-                        name=f"Lớp {grade}",
-                        marker_color=grade_colors.get(
-                            int(grade),
-                            "#888888",
-                        ),
-                        text=topic_grade_data[grade].tolist(),
-                        textposition="none",
-                        hovertemplate=(
-                            "<b>%{x}</b><br>"
-                            f"Lớp {grade}: %{{y}} YCCĐ"
-                            "<extra></extra>"
-                        ),
-                    )
-                )
-
-            fig_topics.update_layout(
-                title=dict(
-                    text=(
-                        "Sự dịch chuyển tỷ trọng Nhóm mạch Nội dung "
-                        "từ Lớp 1 đến Lớp 5"
-                    ),
-                    x=0.5,
-                    xanchor="center",
-                    font=dict(size=20),
-                ),
-                barmode="stack",
-                height=470,
-                bargap=0.25,
-                xaxis=dict(
-                    title="Nhóm mạch nội dung",
-                    tickangle=-35,
-                    categoryorder="array",
-                    categoryarray=plot_topics,
-                    automargin=True,
-                ),
-                yaxis=dict(
-                    title="Số lượng YCCĐ",
-                    range=[0, 50],
-                    dtick=5,
-                    gridcolor="#A3A3A3",
-                    zeroline=False,
-                ),
-                legend=dict(
-                    orientation="v",
-                    x=1.02,
-                    y=0.5,
-                    xanchor="left",
-                    yanchor="middle",
-                    traceorder="normal",
-                ),
-                margin=dict(l=65, r=130, t=90, b=125),
-            )
-
-            st.plotly_chart(
-                fig_topics,
-                use_container_width=True,
-            )
-        else:
-            st.warning("Không có dữ liệu phù hợp với bộ lọc.")
-
-    st.markdown(
-        "**Bảng 1: Ma trận tần suất xuất hiện YCCĐ "
-        "theo 5 nhóm mạch kiến thức:**"
-    )
-    st.dataframe(
-        df_nv16_mach,
-        use_container_width=True,
-        hide_index=True,
-    )
-
-    st.markdown(
-        "**Bảng 2: Ma trận phát triển thao tác nhận thức "
-        "& Chỉ số độ sâu tư duy:**"
-    )
-    st.dataframe(
-        df_nv16_nhan_thuc,
-        use_container_width=True,
-        hide_index=True,
-    )
-
-    with st.expander(
-        "🔍 Xem Bảng ánh xạ 108 Mã YCCĐ vào Ma trận phát triển"
-    ):
-        st.dataframe(
-            df_nv16_truyxuat,
-            use_container_width=True,
-            hide_index=True,
+        fig_topics.update_layout(
+            title=dict(
+                text="Sự dịch chuyển tỷ trọng Nhóm mạch Nội dung từ Lớp 1 đến Lớp 5",
+                x=0.5,
+                xanchor="center",
+                font=dict(size=18, color="#0F172A"),
+            ),
+            barmode="stack",
+            template="plotly_white",
+            height=460,
+            bargap=0.28,
+            xaxis=dict(
+                title="Nhóm mạch nội dung",
+                tickangle=-25,
+                automargin=True,
+            ),
+            yaxis=dict(
+                title="Số lượng YCCĐ",
+                range=[0, 50],
+                dtick=5,
+                gridcolor="#CBD5E1",
+                zeroline=True,
+                zerolinecolor="#94A3B8",
+            ),
+            legend=dict(
+                orientation="v",
+                x=1.02,
+                y=0.5,
+                xanchor="left",
+                yanchor="middle",
+            ),
+            margin=dict(l=55, r=115, t=70, b=110),
         )
+        st.plotly_chart(fig_topics, use_container_width=True)
+
+    st.divider()
+
+    # === BẢNG 1 & BẢNG 2 TỪ NV16.XLSX (ĐỊNH DẠNG GỌN ĐẸP) ===
     st.markdown(
-        "**Bảng 1: Ma trận tần suất xuất hiện YCCĐ theo 5 nhóm mạch kiến"
-        " thức:**"
+        "**Bảng 1: Ma trận tần suất xuất hiện YCCĐ theo 5 nhóm mạch kiến thức:**"
     )
-    st.dataframe(df_nv16_mach, use_container_width=True, hide_index=True)
+    df_mach_display = df_nv16_mach.copy()
+    if "Tỷ trọng (%)" in df_mach_display.columns:
+        df_mach_display["Tỷ trọng (%)"] = (
+            pd.to_numeric(df_mach_display["Tỷ trọng (%)"], errors="coerce") * 100
+        ).map(lambda x: f"{x:.2f}%" if pd.notnull(x) else "")
+    st.dataframe(df_mach_display, use_container_width=True, hide_index=True)
 
     st.markdown(
-        "**Bảng 2: Ma trận phát triển thao tác nhận thức & Chỉ số độ sâu tư"
-        " duy:**"
+        "**Bảng 2: Ma trận phát triển thao tác nhận thức & Chỉ số độ sâu tư duy:**"
     )
-    st.dataframe(df_nv16_nhan_thuc, use_container_width=True, hide_index=True)
+    df_nt_display = df_nv16_nhan_thuc.copy()
+    for col in df_nt_display.columns:
+        if "Tỷ lệ mức cao" in col:
+            df_nt_display[col] = (
+                pd.to_numeric(df_nt_display[col], errors="coerce") * 100
+            ).map(lambda x: f"{x:.2f}%" if pd.notnull(x) else "")
+        elif "Chỉ số độ sâu" in col:
+            df_nt_display[col] = pd.to_numeric(
+                df_nt_display[col], errors="coerce"
+            ).map(lambda x: f"{x:.2f}" if pd.notnull(x) else "")
+    st.dataframe(df_nt_display, use_container_width=True, hide_index=True)
 
     with st.expander("🔍 Xem Bảng ánh xạ 108 Mã YCCĐ vào Ma trận phát triển"):
         st.dataframe(df_nv16_truyxuat, use_container_width=True, hide_index=True)
-
 # ------------------------------------------------------------------------------
 # TAB 4: SƠ ĐỒ TIẾN TRÌNH & HEATMAP
 # ------------------------------------------------------------------------------
