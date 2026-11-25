@@ -686,23 +686,34 @@ with tab_3:
     col_16_chart1, col_16_chart2 = st.columns(2)
 
     with col_16_chart1:
-        st.markdown("**Biểu đồ 1: Phân bố YCCĐ theo Khối lớp & Mức độ nhận thức**")
-        if not df_filtered.empty:
-            grade_order = sorted(df_filtered["Lớp"].dropna().unique())
+        st.markdown(
+            "**Biểu đồ 1: Phân bố YCCĐ theo Khối lớp & Mức độ nhận thức**"
+        )
 
-            dist_df = (
-                df_filtered.groupby(["Lớp", "Mã mức độ"])
-                .size()
-                .unstack(fill_value=0)
-                .reindex(index=grade_order, columns=selected_levels, fill_value=0)
+        if not df_filtered.empty:
+            grade_order = sorted(
+                df_filtered["Lớp"].dropna().unique().tolist()
             )
 
-            level_labels_chart = {
+            dist_df = (
+                df_filtered
+                .groupby(["Lớp", "Mã mức độ"])
+                .size()
+                .unstack(fill_value=0)
+                .reindex(
+                    index=grade_order,
+                    columns=["NB", "TH", "VD", "VDC"],
+                    fill_value=0,
+                )
+            )
+
+            level_labels = {
                 "NB": "Nhận biết (NB)<br>[Trọng số = 1]",
                 "TH": "Thông hiểu (TH)<br>[Trọng số = 2]",
                 "VD": "Vận dụng (VD)<br>[Trọng số = 3]",
                 "VDC": "Vận dụng cao (VDC)<br>[Trọng số = 4]",
             }
+
             color_map = {
                 "NB": "#81D4FA",
                 "TH": "#29B6F6",
@@ -711,43 +722,49 @@ with tab_3:
             }
 
             fig_bar = go.Figure()
-            for level in selected_levels:
-                if level in dist_df.columns:
-                    fig_bar.add_trace(
-                        go.Bar(
-                            x=[f"Lớp {grade}" for grade in grade_order],
-                            y=dist_df[level].tolist(),
-                            name=level_labels_chart[level],
-                            marker_color=color_map[level],
-                            hovertemplate=(
-                                "%{x}<br>"
-                                + level
-                                + ": %{y} YCCĐ<extra></extra>"
-                            ),
-                        )
-                    )
 
-            max_count = int(dist_df.sum(axis=1).max())
-            y_max = max(35, ((max_count + 4) // 5) * 5)
+            for level in ["NB", "TH", "VD", "VDC"]:
+                fig_bar.add_trace(
+                    go.Bar(
+                        x=[f"Lớp {grade}" for grade in grade_order],
+                        y=dist_df[level].tolist(),
+                        name=level_labels[level],
+                        marker=dict(color=color_map[level]),
+                        text=dist_df[level].tolist(),
+                        textposition="none",
+                        hovertemplate=(
+                            "%{x}<br>"
+                            f"{level}: %{{y}} YCCĐ"
+                            "<extra></extra>"
+                        ),
+                    )
+                )
+
+            max_total = int(dist_df.sum(axis=1).max())
 
             fig_bar.update_layout(
                 title=dict(
-                    text="Cơ cấu Mức độ Nhận thức (YCCĐ) qua các lớp 1–5",
+                    text=(
+                        "Cơ cấu Mức độ Nhận thức (YCCĐ) "
+                        "qua các lớp 1–5"
+                    ),
                     x=0.5,
                     xanchor="center",
                     font=dict(size=22),
                 ),
                 barmode="stack",
                 height=430,
-                bargap=0.25,
+                bargap=0.30,
                 xaxis=dict(
                     title="Khối lớp",
                     categoryorder="array",
-                    categoryarray=[f"Lớp {grade}" for grade in grade_order],
+                    categoryarray=[
+                        f"Lớp {grade}" for grade in grade_order
+                    ],
                 ),
                 yaxis=dict(
                     title="Số lượng YCCĐ",
-                    range=[0, y_max],
+                    range=[0, max(35, max_total + 5)],
                     dtick=5,
                     gridcolor="#999999",
                     zeroline=False,
@@ -758,11 +775,15 @@ with tab_3:
                     y=0.5,
                     xanchor="left",
                     yanchor="middle",
-                    font=dict(size=12),
+                    traceorder="normal",
                 ),
                 margin=dict(l=55, r=180, t=75, b=55),
             )
-            st.plotly_chart(fig_bar, use_container_width=True)
+
+            st.plotly_chart(
+                fig_bar,
+                use_container_width=True,
+            )
         else:
             st.warning("Không có dữ liệu phù hợp với bộ lọc.")
 
@@ -775,30 +796,39 @@ with tab_3:
         if not df_filtered.empty:
             topic_order = [
                 "I. Số tự nhiên",
-                "II. Phân số",
-                "III. Số thập phân",
-                "IV. Phép tính",
-                "V. Giải quyết vấn đề",
+                "II. Các phép tính với Số Tự nhiên",
+                "III. Phân số & Phép tính với Phân số",
+                "IV. Số thập phân & Phép tính với Số thập phân",
+                "V. Tỉ số, Tỉ số phần trăm & Ứng dụng",
             ]
 
-            topic_column = "Nhóm mạch nội dung"
             available_topics = (
-                df_filtered[topic_column].unique().tolist()
-                if topic_column in df_filtered.columns
-                else []
+                df_filtered["Nội dung"].dropna().unique().tolist()
             )
 
-            if available_topics:
-                plot_topics = [
-                    topic for topic in topic_order
-                    if topic in available_topics
-                ]
-                plot_topics.extend(
-                    topic for topic in available_topics
-                    if topic not in plot_topics
+            plot_topics = [
+                topic for topic in topic_order
+                if topic in available_topics
+            ]
+
+            plot_topics.extend(
+                topic for topic in available_topics
+                if topic not in plot_topics
+            )
+
+            topic_grade_data = (
+                df_filtered
+                .groupby(["Nội dung", "Lớp"])
+                .size()
+                .unstack(fill_value=0)
+                .reindex(
+                    index=plot_topics,
+                    columns=sorted(
+                        df_filtered["Lớp"].dropna().unique().tolist()
+                    ),
+                    fill_value=0,
                 )
-            else:
-                plot_topics = topic_order
+            )
 
             grade_colors = {
                 1: "#5DADE2",
@@ -808,45 +838,29 @@ with tab_3:
                 5: "#33C3F0",
             }
 
-            topic_grade_data = (
-                df_filtered
-                .groupby([topic_column, "Lớp"])
-                .size()
-                .unstack(fill_value=0)
-                if topic_column in df_filtered.columns
-                else pd.DataFrame()
-            )
+            fig_topics = go.Figure()
 
-            fig_topic = go.Figure()
-
-            if not topic_grade_data.empty:
-                for grade in sorted(topic_grade_data.columns):
-                    values = [
-                        int(topic_grade_data.loc[topic, grade])
-                        if topic in topic_grade_data.index
-                        else 0
-                        for topic in plot_topics
-                    ]
-
-                    fig_topic.add_trace(
-                        go.Bar(
-                            x=plot_topics,
-                            y=values,
-                            name=f"Lớp {grade}",
-                            marker_color=grade_colors.get(
-                                int(grade), "#888888"
-                            ),
-                            text=values,
-                            textposition="none",
-                            hovertemplate=(
-                                "<b>%{x}</b><br>"
-                                f"Lớp {grade}: %{{y}} YCCĐ"
-                                "<extra></extra>"
-                            ),
-                        )
+            for grade in sorted(topic_grade_data.columns):
+                fig_topics.add_trace(
+                    go.Bar(
+                        x=plot_topics,
+                        y=topic_grade_data[grade].tolist(),
+                        name=f"Lớp {grade}",
+                        marker_color=grade_colors.get(
+                            int(grade),
+                            "#888888",
+                        ),
+                        text=topic_grade_data[grade].tolist(),
+                        textposition="none",
+                        hovertemplate=(
+                            "<b>%{x}</b><br>"
+                            f"Lớp {grade}: %{{y}} YCCĐ"
+                            "<extra></extra>"
+                        ),
                     )
+                )
 
-            fig_topic.update_layout(
+            fig_topics.update_layout(
                 title=dict(
                     text=(
                         "Sự dịch chuyển tỷ trọng Nhóm mạch Nội dung "
@@ -884,9 +898,41 @@ with tab_3:
                 margin=dict(l=65, r=130, t=90, b=125),
             )
 
-            st.plotly_chart(fig_topic, use_container_width=True)
+            st.plotly_chart(
+                fig_topics,
+                use_container_width=True,
+            )
         else:
             st.warning("Không có dữ liệu phù hợp với bộ lọc.")
+
+    st.markdown(
+        "**Bảng 1: Ma trận tần suất xuất hiện YCCĐ "
+        "theo 5 nhóm mạch kiến thức:**"
+    )
+    st.dataframe(
+        df_nv16_mach,
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    st.markdown(
+        "**Bảng 2: Ma trận phát triển thao tác nhận thức "
+        "& Chỉ số độ sâu tư duy:**"
+    )
+    st.dataframe(
+        df_nv16_nhan_thuc,
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    with st.expander(
+        "🔍 Xem Bảng ánh xạ 108 Mã YCCĐ vào Ma trận phát triển"
+    ):
+        st.dataframe(
+            df_nv16_truyxuat,
+            use_container_width=True,
+            hide_index=True,
+        )
     st.markdown(
         "**Bảng 1: Ma trận tần suất xuất hiện YCCĐ theo 5 nhóm mạch kiến"
         " thức:**"
