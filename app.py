@@ -685,7 +685,7 @@ with tab_3:
 
     col_16_chart1, col_16_chart2 = st.columns(2)
 
-      with col_16_chart1:
+    with col_16_chart1:
         st.markdown("**Biểu đồ 1: Phân bố YCCĐ theo Khối lớp & Mức độ nhận thức**")
         if not df_filtered.empty:
             grade_order = sorted(df_filtered["Lớp"].dropna().unique())
