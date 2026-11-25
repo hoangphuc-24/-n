@@ -768,50 +768,88 @@ with tab_3:
 
     with col_16_chart2:
         st.markdown(
-            "**Biểu đồ 2: Sự dịch chuyển tỷ trọng nhóm mạch nội dung từ Lớp 1 đến Lớp 5**"
+            "**Biểu đồ 2: Sự dịch chuyển tỷ trọng nhóm mạch nội dung "
+            "từ Lớp 1 đến Lớp 5**"
         )
 
-        grade_order = sorted(selected_grades)
-        topic_order = [
-            topic
-            for topic in df_yccd["Nội dung"].dropna().drop_duplicates().tolist()
-            if topic in selected_topics
-        ]
+        if not df_filtered.empty:
+            topic_order = [
+                "I. Số tự nhiên",
+                "II. Phân số",
+                "III. Số thập phân",
+                "IV. Phép tính",
+                "V. Giải quyết vấn đề",
+            ]
 
-        topic_grade_pivot = (
-            df_filtered.groupby(["Nội dung", "Lớp"])
-            .size()
-            .unstack(fill_value=0)
-            .reindex(index=topic_order, columns=grade_order, fill_value=0)
-        )
+            topic_column = "Nhóm mạch nội dung"
+            available_topics = (
+                df_filtered[topic_column].unique().tolist()
+                if topic_column in df_filtered.columns
+                else []
+            )
 
-        if not topic_grade_pivot.empty:
+            if available_topics:
+                plot_topics = [
+                    topic for topic in topic_order
+                    if topic in available_topics
+                ]
+                plot_topics.extend(
+                    topic for topic in available_topics
+                    if topic not in plot_topics
+                )
+            else:
+                plot_topics = topic_order
+
             grade_colors = {
-                1: "#4F81BD",
-                2: "#C0504D",
-                3: "#9BBB59",
-                4: "#8064A2",
-                5: "#4BACC6",
+                1: "#5DADE2",
+                2: "#EC7063",
+                3: "#58D68D",
+                4: "#AF7AC5",
+                5: "#33C3F0",
             }
 
-            fig_topics = go.Figure()
-            for grade in grade_order:
-                fig_topics.add_trace(
-                    go.Bar(
-                        x=topic_grade_pivot.index.tolist(),
-                        y=topic_grade_pivot[grade].tolist(),
-                        name=f"Lớp {grade}",
-                        marker_color=grade_colors.get(grade, "#888888"),
+            topic_grade_data = (
+                df_filtered
+                .groupby([topic_column, "Lớp"])
+                .size()
+                .unstack(fill_value=0)
+                if topic_column in df_filtered.columns
+                else pd.DataFrame()
+            )
+
+            fig_topic = go.Figure()
+
+            if not topic_grade_data.empty:
+                for grade in sorted(topic_grade_data.columns):
+                    values = [
+                        int(topic_grade_data.loc[topic, grade])
+                        if topic in topic_grade_data.index
+                        else 0
+                        for topic in plot_topics
+                    ]
+
+                    fig_topic.add_trace(
+                        go.Bar(
+                            x=plot_topics,
+                            y=values,
+                            name=f"Lớp {grade}",
+                            marker_color=grade_colors.get(
+                                int(grade), "#888888"
+                            ),
+                            text=values,
+                            textposition="none",
+                            hovertemplate=(
+                                "<b>%{x}</b><br>"
+                                f"Lớp {grade}: %{{y}} YCCĐ"
+                                "<extra></extra>"
+                            ),
+                        )
                     )
-                )
 
-            max_count = int(topic_grade_pivot.sum(axis=1).max())
-            y_max = max(5, ((max_count + 4) // 5) * 5)
-
-            fig_topics.update_layout(
+            fig_topic.update_layout(
                 title=dict(
                     text=(
-                        "Sự dịch chuyển Tỷ trọng Nhóm mạch Nội dung "
+                        "Sự dịch chuyển tỷ trọng Nhóm mạch Nội dung "
                         "từ Lớp 1 đến Lớp 5"
                     ),
                     x=0.5,
@@ -819,26 +857,34 @@ with tab_3:
                     font=dict(size=20),
                 ),
                 barmode="stack",
-                height=460,
+                height=470,
+                bargap=0.25,
                 xaxis=dict(
-                    title="Khối lớp",
-                    tickangle=-45,
+                    title="Nhóm mạch nội dung",
+                    tickangle=-35,
+                    categoryorder="array",
+                    categoryarray=plot_topics,
                     automargin=True,
                 ),
                 yaxis=dict(
                     title="Số lượng YCCĐ",
-                    range=[0, y_max],
+                    range=[0, 50],
                     dtick=5,
-                    gridcolor="#999999",
+                    gridcolor="#A3A3A3",
+                    zeroline=False,
                 ),
                 legend=dict(
-                    title="",
-                    traceorder="reversed",
                     orientation="v",
+                    x=1.02,
+                    y=0.5,
+                    xanchor="left",
+                    yanchor="middle",
+                    traceorder="normal",
                 ),
-                margin=dict(l=55, r=20, t=75, b=110),
+                margin=dict(l=65, r=130, t=90, b=125),
             )
-            st.plotly_chart(fig_topics, use_container_width=True)
+
+            st.plotly_chart(fig_topic, use_container_width=True)
         else:
             st.warning("Không có dữ liệu phù hợp với bộ lọc.")
     st.markdown(
