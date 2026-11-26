@@ -948,9 +948,6 @@ with tab_4:
 # ------------------------------------------------------------------------------
 # TAB 5: PHÂN TÍCH ĐỒNG TÂM & BÁO CÁO BẢO VỆ
 # ------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------
-# TAB 5: PHÂN TÍCH ĐỒNG TÂM & BÁO CÁO BẢO VỆ
-# ------------------------------------------------------------------------------
 with tab_5:
     st.subheader(
         "Phân tích sự mở rộng phạm vi, tính đồng tâm và chiều sâu kiến thức"
@@ -1000,8 +997,6 @@ with tab_files:
         " nhanh nội dung các sheet bên dưới:"
     )
 
-    GITHUB_REPO_URL = "https://github.com/hoangphuc-24"
-
     excel_catalog = [
         {
             "filename": "NV 13,14.xlsx",
@@ -1045,27 +1040,18 @@ with tab_files:
                 st.markdown(f"#### 📄 {item['title']}")
                 st.caption(f"Tên file gốc: `{fname}` — {item['desc']}")
 
-                btn_col1, btn_col2 = st.columns(2)
-                with btn_col1:
-                    if os.path.exists(fname):
-                        with open(fname, "rb") as f:
-                            st.download_button(
-                                label=f"📥 Tải file {fname}",
-                                data=f,
-                                file_name=fname,
-                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                key=f"dl_{fname}",
-                                use_container_width=True,
-                            )
-                    else:
-                        st.warning(f"Không tìm thấy {fname}")
-
-                with btn_col2:
-                    st.link_button(
-                        label="🔗 Mở trên GitHub",
-                        url=f"{GITHUB_REPO_URL}",
-                        use_container_width=True,
-                    )
+                if os.path.exists(fname):
+                    with open(fname, "rb") as f:
+                        st.download_button(
+                            label=f"📥 Tải file {fname}",
+                            data=f,
+                            file_name=fname,
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            key=f"dl_{fname}",
+                            use_container_width=True,
+                        )
+                else:
+                    st.warning(f"Không tìm thấy {fname}")
 
     st.divider()
     st.markdown("### 👁️ Xem nhanh nội dung chi tiết từng file Excel")
