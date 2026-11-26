@@ -729,10 +729,10 @@ with tab_3:
                     text=[f"<b>{int(v)}</b>" if v > 0 else "" for v in y_vals],
                     textposition="inside",
                     insidetextanchor="middle",
-                    textangle=0,          # Ép số luôn đứng thẳng (không xoay ngang)
-                    constraintext="none", # Không tự thu nhỏ chữ ở các ô hẹp
+                    textangle=0,
+                    constraintext="none",
                     textfont=dict(
-                        color="#0F172A",  # Chữ đen đậm nổi bật trên nền màu sáng
+                        color="#0F172A",
                         size=12,
                         family="Arial",
                     ),
@@ -749,25 +749,31 @@ with tab_3:
                 text="<b>Cơ cấu Mức độ Nhận thức (YCCĐ) qua các lớp 1–5</b>",
                 x=0.5,
                 xanchor="center",
-                font=dict(size=17, color="#F8FAFC"),  # Màu trắng sáng dễ đọc
+                font=dict(size=17, color="#1E293B"),  # Tiêu đề xám đậm
             ),
             barmode="stack",
             height=470,
             bargap=0.30,
             xaxis=dict(
-                title=dict(text="Khối lớp", font=dict(color="#E2E8F0")),
-                tickfont=dict(color="#E2E8F0", size=12),
+                title=dict(
+                    text="Khối lớp",
+                    font=dict(color="#334155", size=13),
+                ),
+                tickfont=dict(color="#334155", size=12),
                 categoryorder="array",
                 categoryarray=["Lớp 1", "Lớp 2", "Lớp 3", "Lớp 4", "Lớp 5"],
             ),
             yaxis=dict(
-                title=dict(text="Số lượng YCCĐ", font=dict(color="#E2E8F0")),
-                tickfont=dict(color="#E2E8F0", size=12),
+                title=dict(
+                    text="Số lượng YCCĐ",
+                    font=dict(color="#334155", size=13),
+                ),
+                tickfont=dict(color="#334155", size=12),
                 range=[0, 35],
                 dtick=5,
-                gridcolor="rgba(148, 163, 184, 0.35)",
+                gridcolor="#CBD5E1",
                 zeroline=True,
-                zerolinecolor="#94A3B8",
+                zerolinecolor="#64748B",
             ),
             legend=dict(
                 orientation="v",
@@ -775,7 +781,7 @@ with tab_3:
                 y=0.5,
                 xanchor="left",
                 yanchor="middle",
-                font=dict(color="#F1F5F9", size=12),
+                font=dict(color="#334155", size=12),  # Chữ chú giải xám đậm
             ),
             margin=dict(l=55, r=165, t=70, b=55),
         )
@@ -815,10 +821,10 @@ with tab_3:
                     text=[f"<b>{int(v)}</b>" if v > 0 else "" for v in y_vals],
                     textposition="inside",
                     insidetextanchor="middle",
-                    textangle=0,          # Ép số luôn đứng thẳng
-                    constraintext="none", # Giữ nguyên cỡ chữ ở các tầng mỏng (như số 2, 3, 4)
+                    textangle=0,
+                    constraintext="none",
                     textfont=dict(
-                        color="#0F172A",  # Chữ đen đậm tương phản cao
+                        color="#0F172A",
                         size=12,
                         family="Arial",
                     ),
@@ -833,25 +839,31 @@ with tab_3:
                 text="<b>Sự dịch chuyển tỷ trọng Nhóm mạch Nội dung từ Lớp 1–5</b>",
                 x=0.5,
                 xanchor="center",
-                font=dict(size=17, color="#F8FAFC"),  # Màu trắng sáng dễ đọc
+                font=dict(size=17, color="#1E293B"),  # Tiêu đề xám đậm
             ),
             barmode="stack",
             height=470,
             bargap=0.28,
             xaxis=dict(
-                title=dict(text="Nhóm mạch nội dung", font=dict(color="#E2E8F0")),
-                tickfont=dict(color="#E2E8F0", size=11),
+                title=dict(
+                    text="Nhóm mạch nội dung",
+                    font=dict(color="#334155", size=13),
+                ),
+                tickfont=dict(color="#334155", size=11),
                 tickangle=-25,
                 automargin=True,
             ),
             yaxis=dict(
-                title=dict(text="Số lượng YCCĐ", font=dict(color="#E2E8F0")),
-                tickfont=dict(color="#E2E8F0", size=12),
+                title=dict(
+                    text="Số lượng YCCĐ",
+                    font=dict(color="#334155", size=13),
+                ),
+                tickfont=dict(color="#334155", size=12),
                 range=[0, 50],
                 dtick=5,
-                gridcolor="rgba(148, 163, 184, 0.35)",
+                gridcolor="#CBD5E1",
                 zeroline=True,
-                zerolinecolor="#94A3B8",
+                zerolinecolor="#64748B",
             ),
             legend=dict(
                 orientation="v",
@@ -859,7 +871,7 @@ with tab_3:
                 y=0.5,
                 xanchor="left",
                 yanchor="middle",
-                font=dict(color="#F1F5F9", size=12),
+                font=dict(color="#334155", size=12),  # Chữ chú giải xám đậm
             ),
             margin=dict(l=55, r=115, t=70, b=110),
         )
